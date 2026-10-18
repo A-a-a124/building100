@@ -170,6 +170,10 @@ body.cine .main { grid-template-columns: 1fr; }
       </div>
       <div class="sec" id="details"></div>
       <div class="sec">
+        <h2>Team and drones</h2>
+        <div class="zones" id="team"></div>
+      </div>
+      <div class="sec">
         <h2>Zones</h2>
         <div class="zones" id="zones"></div>
       </div>
@@ -217,12 +221,12 @@ body.cine .main { grid-template-columns: 1fr; }
       <p class="note" style="color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Welcome to</p>
       <h2 id="introT">Building 100 Materials Warehouse</h2>
     </div>
-    <p>A 3D model of the whole warehouse: receiving, inspection, pallet racking, pipe yard, small parts, hazardous materials and shipping. Forklifts and trucks move in front of you, driven by a live simulation.</p>
+    <p>A 3D model of the whole warehouse and its open yard. Forklifts handle the heavy pallets, the team carries the light cartons, and drones count stock, all driven by a live simulation.</p>
     <div class="how">
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 9 9"/><path d="m21 3-4 1 1 4"/></svg><b>Drag to rotate</b><span>Left mouse button, or one finger</span></div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6M20 20l-3.5-3.5"/></svg><b>Zoom</b><span>Mouse wheel, or pinch with two fingers</span></div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg><b>Pan</b><span>Right mouse button, or two-finger drag</span></div>
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v10l2.5-2 2 4.5 2-1-2-4.5H17z"/></svg><b>Click anything</b><span>A pallet, zone or forklift shows its details</span></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v10l2.5-2 2 4.5 2-1-2-4.5H17z"/></svg><b>Click anything</b><span>A pallet, zone, forklift, person or drone shows its details</span></div>
     </div>
     <div class="row"><button class="btn primary" id="introTour">Start the 90-second tour</button><button class="btn" id="introClose">Explore on my own</button></div>
   </div>
@@ -232,6 +236,8 @@ body.cine .main { grid-template-columns: 1fr; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="js/data.js"></script>
 <script src="js/world.js"></script>
+<script src="js/yard.js"></script>
 <script src="js/sim.js"></script>
+<script src="js/actors.js"></script>
 <script src="js/panel.js"></script>
 <script src="js/ui.js"></script>

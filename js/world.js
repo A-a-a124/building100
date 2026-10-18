@@ -4,6 +4,7 @@
   const T = THREE;
   const W = (B.world = { pickables: [], doorsIn: [], doorsOut: [], stageIn: [], stageOut: [] });
   const RACK = B.RACK;
+  const BX0 = B.BUILDING.x0, BX1 = B.BUILDING.x1, BZ0 = B.BUILDING.z0, BZ1 = B.BUILDING.z1, BWd = BX1 - BX0, BDp = BZ1 - BZ0;
 
   const matCache = {};
   function mat(color, o) {
@@ -63,14 +64,14 @@
     sand.receiveShadow = true;
     scene.add(sand);
     const asphalt = mat('#4b4f55', { roughness: 0.95 });
-    [[-39, -60, 42, 50], [5, 60, 54, 50]].forEach(([x, z, w, d]) => {
+    [[-45, BZ0 - 25, 44, 50], [6, BZ1 + 25, 66, 50], [(BX1 + 76) / 2, 0, 76 - BX1, BDp + 20], [96, BZ1 + 5, 44, 10]].forEach(([x, z, w, d]) => {
       const p = new T.Mesh(new T.PlaneGeometry(w, d), asphalt);
       p.rotation.x = -Math.PI / 2;
       p.position.set(x, -0.03, z);
       p.receiveShadow = true;
       scene.add(p);
     });
-    const floor = new T.Mesh(new T.PlaneGeometry(120, 70), mat('#b8bdc2', { roughness: 0.9 }));
+    const floor = new T.Mesh(new T.PlaneGeometry(BWd, BDp), mat('#b8bdc2', { roughness: 0.9 }));
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     scene.add(floor);
@@ -80,7 +81,7 @@
     const g = (W.shell = new T.Group());
     const glass = new T.MeshStandardMaterial({ color: '#c9d3dc', transparent: true, opacity: 0.16, depthWrite: false, side: T.DoubleSide });
     const H = B.BUILDING.h;
-    const walls = [[0, -35, 120, 0.3], [0, 35, 120, 0.3], [-60, 0, 0.3, 70], [60, 0, 0.3, 70]];
+    const walls = [[0, BZ0, BWd, 0.3], [0, BZ1, BWd, 0.3], [BX0, 0, 0.3, BDp], [BX1, 0, 0.3, BDp]];
     walls.forEach(([x, z, w, d]) => {
       const m = new T.Mesh(new T.BoxGeometry(w, H, d), glass);
       m.position.set(x, H / 2, z);
@@ -90,14 +91,16 @@
       g.add(base);
     });
     // Perimeter steel columns
-    for (let x = -60; x <= 60; x += 10) {
-      [-35, 35].forEach((z) => { const c = box(0.45, H, 0.45, '#56616c'); c.position.set(x, H / 2, z); g.add(c); });
+    for (let k = 0; k <= 12; k++) {
+      const x = BX0 + (BWd * k) / 12;
+      [BZ0, BZ1].forEach((z) => { const c = box(0.45, H, 0.45, '#56616c'); c.position.set(x, H / 2, z); g.add(c); });
     }
-    for (let z = -25; z <= 25; z += 10) {
-      [-60, 60].forEach((x) => { const c = box(0.45, H, 0.45, '#56616c'); c.position.set(x, H / 2, z); g.add(c); });
+    for (let k = 1; k < 8; k++) {
+      const z = BZ0 + (BDp * k) / 8;
+      [BX0, BX1].forEach((x) => { const c = box(0.45, H, 0.45, '#56616c'); c.position.set(x, H / 2, z); g.add(c); });
     }
     // Roof edge frame
-    [[0, -35, 120, 0.5], [0, 35, 120, 0.5], [-60, 0, 0.5, 70], [60, 0, 0.5, 70]].forEach(([x, z, w, d]) => {
+    [[0, BZ0, BWd, 0.5], [0, BZ1, BWd, 0.5], [BX0, 0, 0.5, BDp], [BX1, 0, 0.5, BDp]].forEach(([x, z, w, d]) => {
       const e = box(w, 0.5, d, '#56616c');
       e.position.set(x, H, z);
       g.add(e);
@@ -204,20 +207,20 @@
 
   function pipeYard(scene) {
     const g = new T.Group();
-    const xs = [-54, -47, -40];
+    const xs = [-62, -54, -46];
     const levels = [0.6, 2.0, 3.4];
     const n = xs.length * 2 * levels.length * 2 * 6;
     const pipes = inst(new T.CylinderGeometry(1, 1, 12, 14), mat('#6d5a48', { metalness: 0.4, roughness: 0.55 }), n);
     let i = 0;
     xs.forEach((x, ri) => {
-      for (let z = -2; z <= 30; z += 4) {
+      for (let z = -6; z <= 34; z += 4) {
         const c = box(0.35, 4.4, 0.35, '#2b5c9c');
         c.position.set(x, 2.2, z);
         g.add(c);
         levels.forEach((y) => { const arm = box(3.6, 0.14, 0.18, '#e07b24'); arm.position.set(x, y - 0.1, z); g.add(arm); });
       }
       const r = [0.16, 0.22, 0.32][ri];
-      [-1, 1].forEach((side) => levels.forEach((y) => [6, 22].forEach((zc) => {
+      [-1, 1].forEach((side) => levels.forEach((y) => [3, 22].forEach((zc) => {
         for (let k = 0; k < 6; k++) {
           const px = x + side * (0.5 + (k % 3) * r * 2.1), py = y + r + Math.floor(k / 3) * r * 1.9;
           Q.setFromAxisAngle(new T.Vector3(1, 0, 0), Math.PI / 2);
@@ -234,7 +237,7 @@
     const zn = B.zoneById('HAZ');
     const g = new T.Group();
     const fence = new T.MeshStandardMaterial({ color: '#c0392b', transparent: true, opacity: 0.22, side: T.DoubleSide, depthWrite: false });
-    const edges = [[zn.x[0], zn.z[0], zn.x[1], zn.z[0]], [zn.x[1], zn.z[0], zn.x[1], zn.z[1]], [zn.x[0], zn.z[1], zn.x[1], zn.z[1]], [zn.x[0], zn.z[0], zn.x[0], 17], [zn.x[0], 21, zn.x[0], zn.z[1]]];
+    const edges = [[zn.x[0], zn.z[0], zn.x[1], zn.z[0]], [zn.x[1], zn.z[0], zn.x[1], zn.z[1]], [zn.x[0], zn.z[1], zn.x[1], zn.z[1]], [zn.x[0], zn.z[0], zn.x[0], (zn.z[0] + zn.z[1]) / 2 - 2], [zn.x[0], (zn.z[0] + zn.z[1]) / 2 + 2, zn.x[0], zn.z[1]]];
     edges.forEach(([x1, z1, x2, z2]) => {
       const len = Math.hypot(x2 - x1, z2 - z1);
       const p = new T.Mesh(new T.PlaneGeometry(len, 2.6), fence);
@@ -253,7 +256,7 @@
     let i = 0;
     for (let r = 0; r < 4; r++) {
       for (let p = 0; p < 6; p++) {
-        const cx = 41 + r * 3.6, cz = 9 + p * 1.6;
+        const cx = zn.x[0] + 3.5 + r * 4.2, cz = zn.z[0] + 3.5 + p * 1.9;
         const spill = box(1.3, 0.3, 1.3, '#d4a60d');
         spill.position.set(cx, 0.15, cz);
         g.add(spill);
@@ -265,33 +268,34 @@
     }
     g.add(tag(drums, { type: 'zone', id: 'HAZ' }));
     const cyl = inst(new T.CylinderGeometry(0.12, 0.12, 1.5, 10), mat('#5d8a5e', { metalness: 0.4 }), 24);
-    for (let k = 0; k < 24; k++) setInst(cyl, k, 42 + (k % 12) * 0.4, 0.75, 27 + Math.floor(k / 12) * 0.5, 1, 1, 1);
+    for (let k = 0; k < 24; k++) setInst(cyl, k, zn.x[0] + 4 + (k % 12) * 0.4, 0.75, zn.z[1] - 4 + Math.floor(k / 12) * 0.5, 1, 1, 1);
     g.add(tag(cyl, { type: 'zone', id: 'HAZ' }));
     const chain = box(5, 0.05, 0.05, '#333333');
-    chain.position.set(44.2, 1.1, 26.75);
+    chain.position.set(zn.x[0] + 6.2, 1.1, zn.z[1] - 3.75);
     g.add(chain);
     scene.add(g);
   }
 
   function shelving(scene) {
     const g = new T.Group();
-    const xs = [40, 43.5, 47, 50.5, 54, 57];
+    const sz = B.zoneById('SHELF');
+    const xs = [0, 1, 2, 3, 4, 5].map((k) => sz.x[0] + 2 + k * 3.4);
     const shelvesY = [0.15, 0.65, 1.15, 1.65, 2.15];
-    const perShelf = 43;
+    const perShelf = 46, zc = (sz.z[0] + sz.z[1]) / 2, len = perShelf * 0.6;
     const bins = inst(new T.BoxGeometry(0.45, 0.28, 0.5), new T.MeshStandardMaterial({ color: '#ffffff', roughness: 0.6 }), xs.length * shelvesY.length * perShelf);
     const binColors = ['#2d6fb8', '#2d6fb8', '#d64541', '#4a5560', '#2d6fb8', '#e2a400'];
     let i = 0;
     xs.forEach((x, u) => {
       shelvesY.forEach((y) => {
-        const s = box(0.6, 0.04, 26, '#9aa4ae', { metalness: 0.4 });
-        s.position.set(x, y, -15);
+        const s = box(0.6, 0.04, len + 0.4, '#9aa4ae', { metalness: 0.4 });
+        s.position.set(x, y, zc);
         g.add(s);
         for (let k = 0; k < perShelf; k++) {
-          setInst(bins, i, x, y + 0.16, -27.7 + k * 0.6, 1, 1, 1);
+          setInst(bins, i, x, y + 0.16, zc - len / 2 + 0.3 + k * 0.6, 1, 1, 1);
           bins.setColorAt(i++, C.set(binColors[(u + k) % 6]));
         }
       });
-      [-28, -15, -2].forEach((z) => [-0.28, 0.28].forEach((dx) => { const p = box(0.05, 2.6, 0.05, '#6f7b86'); p.position.set(x + dx, 1.3, z); g.add(p); }));
+      [zc - len / 2, zc, zc + len / 2].forEach((z) => [-0.28, 0.28].forEach((dx) => { const p = box(0.05, 2.6, 0.05, '#6f7b86'); p.position.set(x + dx, 1.3, z); g.add(p); }));
     });
     g.add(tag(bins, { type: 'zone', id: 'SHELF' }));
     scene.add(g);
@@ -299,7 +303,7 @@
 
   function qc(scene) {
     const g = new T.Group();
-    [[-55, -17], [-55, -12.5]].forEach(([x, z]) => {
+    [[-63, -21], [-63, -16.5]].forEach(([x, z]) => {
       const t = box(2.4, 0.9, 1.2, '#7f8c99', { metalness: 0.3 });
       t.position.set(x, 0.45, z);
       g.add(tag(t, { type: 'zone', id: 'QC' }));
@@ -307,7 +311,7 @@
     const holds = ['#3c8d4f', '#d64541', '#3c8d4f', '#d9a400', '#3c8d4f', '#d64541', '#3c8d4f', '#3c8d4f'];
     holds.forEach((c, k) => {
       const p = W.makePallet(B.itemsByCat[['valve', 'elec', 'inst', 'mech'][k % 4]][k % 3]);
-      p.position.set(-50 + (k % 4) * 2.6, 0, -18 + Math.floor(k / 4) * 5);
+      p.position.set(-58 + (k % 4) * 2.6, 0, -21 + Math.floor(k / 4) * 5);
       const tagM = box(0.4, 0.3, 0.05, c, { emissive: c, emissiveIntensity: 0.4 });
       tagM.position.set(0, 0.9, 0.52);
       p.add(tagM);
@@ -332,10 +336,10 @@
     const chg = B.zoneById('CHG');
     for (let k = 0; k < 6; k++) {
       const c = box(0.8, 1.6, 0.5, '#3f8f4f');
-      c.position.set(chg.x[0] + 1 + k * 2.2, 0.8, -32.6);
+      c.position.set(chg.x[0] + 1 + k * 2.2, 0.8, chg.z[0] + 0.4);
       scene.add(tag(c, { type: 'zone', id: 'CHG' }));
       const led = box(0.3, 0.1, 0.02, '#7dff9a', { emissive: '#3cff6a', emissiveIntensity: 1 });
-      led.position.set(chg.x[0] + 1 + k * 2.2, 1.3, -32.34);
+      led.position.set(chg.x[0] + 1 + k * 2.2, 1.3, chg.z[0] + 0.66);
       scene.add(led);
     }
   }
@@ -356,11 +360,11 @@
       scene.add(lamp);
       list.push({ x, z, dir, busy: false, n: idx + 1, lamp });
     };
-    [-52, -44, -36, -28].forEach((x, k) => make(x, -35, 1, W.doorsIn, k));
-    [-12, 0, 12, 24].forEach((x, k) => make(x, 35, -1, W.doorsOut, k));
+    [-60, -51, -42, -33].forEach((x, k) => make(x, BZ0, 1, W.doorsIn, k));
+    [-16, -2, 12, 26].forEach((x, k) => make(x, BZ1, -1, W.doorsOut, k));
     // One row of 6 staging spots per door so a forklift can reach every pallet directly
-    W.doorsIn.forEach((d) => { for (let j = 0; j < 6; j++) W.stageIn.push({ x: d.x - 3.25 + j * 1.3, z: -27.2, door: d, used: null }); });
-    W.doorsOut.forEach((d) => { for (let j = 0; j < 6; j++) W.stageOut.push({ x: d.x - 3.25 + j * 1.3, z: 28.6, door: d, used: null }); });
+    W.doorsIn.forEach((d) => { for (let j = 0; j < 6; j++) W.stageIn.push({ x: d.x - 3.25 + j * 1.3, z: BZ0 + 7.8, door: d, used: null }); });
+    W.doorsOut.forEach((d) => { for (let j = 0; j < 6; j++) W.stageOut.push({ x: d.x - 3.25 + j * 1.3, z: BZ1 - 6.4, door: d, used: null }); });
   }
   W.setDoorLamp = function (d, busy) {
     d.busy = busy;
@@ -383,10 +387,10 @@
     const w = 1.7;
     stripe(L.west - w, L.front, L.west - w, L.back); stripe(L.west + w, L.front + w, L.west + w, L.back - w);
     stripe(L.east - w, L.front + w, L.east - w, L.back - w); stripe(L.east + w, L.front, L.east + w, L.back);
-    stripe(-56, L.front - w, L.east + w, L.front - w); stripe(-56, L.front + w, L.west - w, L.front + w); stripe(L.west + w, L.front + w, L.east - w, L.front + w);
+    stripe(-64, L.front - w, L.east + w, L.front - w); stripe(-64, L.front + w, L.west - w, L.front + w); stripe(L.west + w, L.front + w, L.east - w, L.front + w);
     stripe(L.west - w, L.back + w, L.east + w, L.back + w); stripe(L.west + w, L.back - w, L.east - w, L.back - w);
     // Direction arrows on the west lane
-    for (let z = -16; z <= 20; z += 9) {
+    for (let z = -20; z <= 24; z += 9) {
       const a = new T.Mesh(new T.CircleGeometry(0.6, 3), yellow);
       a.rotation.x = -Math.PI / 2;
       a.position.set(L.west, 0.036, z);
@@ -460,7 +464,7 @@
   W.buildLabels = function () {
     while (W.labels.children.length) W.labels.remove(W.labels.children[0]);
     B.ZONES.forEach((zn) => {
-      const l = W.makeLabel(zn.name, { stripe: zn.color, size: zn.id === 'RACK' ? 2.4 : 1.8 });
+      const l = W.makeLabel(zn.name, { stripe: zn.color, size: zn.id === 'RACK' || zn.id === 'YARD' ? 2.4 : 1.8 });
       l.position.set((zn.x[0] + zn.x[1]) / 2, zn.labelY, (zn.z[0] + zn.z[1]) / 2);
       W.labels.add(l);
     });
@@ -477,7 +481,7 @@
       W.labels.add(l);
     });
     const name = W.makeLabel('BUILDING 100 · MATERIALS WAREHOUSE', { size: 3.2, bg: 'rgba(242,179,27,0.95)', fg: '#1a1300', weight: 700 });
-    name.position.set(-20, 15, -35);
+    name.position.set(-22, 15, BZ0);
     W.labels.add(name);
   };
 })();

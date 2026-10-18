@@ -29,6 +29,7 @@
     const m = Math.floor(t / 60) % 1440;
     return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
   };
+  S.addLog = (m, k) => log(m, k);
   function log(msg, kind) {
     S.log.unshift({ t: S.clock(S.st.t), msg, kind: kind || 'info' });
     if (S.log.length > 30) S.log.pop();
@@ -84,7 +85,7 @@
   function addForklift() {
     const n = S.forklifts.length + 1;
     const chg = B.zoneById('CHG');
-    const home = { x: chg.x[0] + 1 + ((n - 1) % 6) * 2.2, z: -30.2, lz: L.front, face: { x: chg.x[0] + 1 + ((n - 1) % 6) * 2.2, z: -34 } };
+    const home = { x: chg.x[0] + 1 + ((n - 1) % 6) * 2.2, z: chg.z[0] + 2.8, lz: L.front, face: { x: chg.x[0] + 1 + ((n - 1) % 6) * 2.2, z: chg.z[0] } };
     const mesh = makeForklift(n);
     mesh.position.set(home.x, 0, home.z);
     const f = { n, mesh, x: home.x, z: home.z, head: 0, path: [], task: null, phase: 'idle', carY: 0.12, load: null, home, busyT: 0, totT: 0, lift: null, at: null };

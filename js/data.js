@@ -13,45 +13,48 @@
   B.rng = rng;
   const R = rng(100);
 
-  // Building is 120 x 70 m, 12 m high. North = negative z
-  B.BUILDING = { x0: -60, x1: 60, z0: -35, z1: 35, h: 12 };
+  // Building is 138 x 80 m, 12 m high. North = negative z
+  B.BUILDING = { x0: -69, x1: 69, z0: -40, z1: 40, h: 12 };
   // Forklift lane network
-  B.LANES = { west: -31, east: 34, front: -22, back: 23 };
+  B.LANES = { west: -37, east: 41.5, front: -27, back: 28 };
 
   B.ZONES = [
-    { id: 'RCV', name: 'Receiving', x: [-58, -20], z: [-33, -24], color: '#3a7bd5', labelY: 4,
+    { id: 'RCV', name: 'Receiving', x: [-66, -24], z: [-38, -29], color: '#3a7bd5', labelY: 4,
       desc: 'Inbound trucks dock at 4 doors on the north wall. Pallets are unloaded into the staging lane, booked into the system, then put away by forklift.',
       capacity: '4 dock doors, 24 staging positions' },
-    { id: 'QC', name: 'Quality Inspection', x: [-58, -38], z: [-20, -9], color: '#7d5bc6', labelY: 4,
+    { id: 'QC', name: 'Quality Inspection', x: [-66, -44], z: [-24, -12], color: '#7d5bc6', labelY: 4,
       desc: 'Incoming material is checked against the purchase order before storage. Non-conforming items stay on hold here until a decision is made.',
       capacity: '12 pallets, 2 inspection tables' },
-    { id: 'PIPE', name: 'Pipe & Large Valve Yard', x: [-58, -35], z: [-5, 32], color: '#8a6a4a', labelY: 6,
+    { id: 'PIPE', name: 'Pipe & Large Valve Yard', x: [-66, -41], z: [-8, 37], color: '#8a6a4a', labelY: 6,
       desc: 'Cantilever racks holding 12 m pipe lengths on three arm levels.',
       capacity: '3 cantilever racks, 216 pipe bundles' },
-    { id: 'RACK', name: 'Pallet Racking', x: [-28, 32], z: [-20, 21], color: '#2a8c82', labelY: 11,
-      desc: 'Selective racking in 12 rows (A to L). Each row has 20 bays, each bay 5 levels with 2 pallets per level. Every row is served from the aisle in front of it.',
-      capacity: '2,400 pallet positions' },
-    { id: 'SHELF', name: 'Small Parts Store', x: [38, 58], z: [-30, 1], color: '#4f7cac', labelY: 4.5,
+    { id: 'RACK', name: 'Pallet Racking', x: [-34, 37], z: [-24, 25], color: '#2a8c82', labelY: 11,
+      desc: 'Selective racking in 14 rows (A to N). Each row has 24 bays, each bay 5 levels with 2 pallets per level. Every row is served from the aisle in front of it.',
+      capacity: '3,360 pallet positions' },
+    { id: 'SHELF', name: 'Small Parts Store', x: [46, 66], z: [-36, -3], color: '#4f7cac', labelY: 4.5,
       desc: 'Bin shelving for small, high-value spares: bearings, seals, O-rings, fuses and instrument parts.',
       capacity: '6 shelving runs, about 1,300 bins' },
-    { id: 'HAZ', name: 'Hazardous Materials Cage', x: [38, 58], z: [6, 32], color: '#c0392b', labelY: 4.5,
+    { id: 'HAZ', name: 'Hazardous Materials Cage', x: [46, 66], z: [3, 37], color: '#c0392b', labelY: 4.5,
       desc: 'Fenced cage with a spill-containment floor. Permit-only entry. Drums sit on spill pallets and gas cylinders are chained in racks.',
       capacity: '96 drums, 24 gas cylinders' },
-    { id: 'DSP', name: 'Shipping & Issue', x: [-22, 32], z: [25, 33], color: '#d08a12', labelY: 4,
+    { id: 'DSP', name: 'Shipping & Issue', x: [-26, 37], z: [30, 38], color: '#d08a12', labelY: 4,
       desc: 'Issue orders are assembled here, then loaded onto project and plant trucks through 4 doors on the south wall.',
       capacity: '4 dock doors, 24 marshalling positions' },
-    { id: 'OFF', name: 'Warehouse Office', x: [-16, -2], z: [-33, -25], color: '#5d6d7e', labelY: 5.5,
-      desc: 'Storekeeper and shift supervisor office, and the document issue counter.',
-      capacity: '8 workstations' },
-    { id: 'CHG', name: 'Forklift Charging', x: [2, 16], z: [-33, -27], color: '#3f8f4f', labelY: 3.5,
+    { id: 'OFF', name: 'Warehouse Office', x: [-20, -4], z: [-38, -29], color: '#5d6d7e', labelY: 5.5,
+      desc: 'Storekeeper and inventory controller office, with the document issue counter and a coffee corner.',
+      capacity: '6 workstations' },
+    { id: 'CHG', name: 'Forklift Charging', x: [0, 16], z: [-38, -32], color: '#3f8f4f', labelY: 3.5,
       desc: 'Electric forklifts park here to charge whenever they have no task.',
       capacity: '6 chargers' },
+    { id: 'YARD', name: 'Open Storage Yard', x: [76, 116], z: [-36, 36], color: '#6f8f3a', labelY: 7, outdoor: true,
+      desc: 'Fenced outdoor yard beside the warehouse for bulky, weather-tolerant stock: pipe on timber sleepers, cable drums, steel sections and containers. Surveyed by drone.',
+      capacity: '27 pipe bundles, 20 cable drums, 12 containers, 4 steel stacks' },
   ];
   B.zoneById = (id) => B.ZONES.find((z) => z.id === id);
 
   // Pallet racking
-  const RACK = (B.RACK = { x0: -26, bays: 20, bayW: 2.8, levels: 5, levelH: 1.75, depth: 1.2, pairs: 6, z0: -16, pitch: 6.2, back: 0.2, rows: [] });
-  const letters = 'ABCDEFGHIJKL';
+  const RACK = (B.RACK = { x0: -32, bays: 24, bayW: 2.8, levels: 5, levelH: 1.75, depth: 1.2, pairs: 7, z0: -20, pitch: 6.2, back: 0.2, rows: [] });
+  const letters = 'ABCDEFGHIJKLMN';
   for (let k = 0; k < RACK.pairs; k++) {
     const za = RACK.z0 + k * RACK.pitch;
     const zb = za + RACK.depth + RACK.back;
@@ -112,7 +115,7 @@
   B.itemsByCat = byCat;
 
   // Each row is assigned a main category, with some mixing as in real stores
-  const ROW_CAT = ['valve', 'valve', 'flange', 'flange', 'gasket', 'elec', 'elec', 'mech', 'mech', 'inst', 'ppe', 'cons'];
+  const ROW_CAT = ['valve', 'valve', 'flange', 'flange', 'gasket', 'gasket', 'elec', 'elec', 'mech', 'mech', 'inst', 'inst', 'ppe', 'cons'];
   B.ROW_CAT = ROW_CAT;
   B.randomItemForRow = function (ri, r) {
     r = r || R;
@@ -161,6 +164,10 @@
     Z('SHELF', 'Industrial Fuses', '10-100 A', 'EA', 1800, 'Shelf S3'),
     Z('SHELF', 'Needle Roller Bearing', 'NK 35/20', 'EA', 340, 'Shelf S4'),
     Z('SHELF', 'Small-Bore Tube Fittings', '1/2 in, 316SS', 'EA', 2600, 'Shelves S5-S6'),
+    Z('YARD', 'Carbon Steel Line Pipe', '16 in, API 5L X52, 12 m lengths', 'M', 2880, 'Yard rows Y1-Y3'),
+    Z('YARD', 'Power Cable Drums', '3 x 240 mm2, 1,000 m drums', 'RL', 40, 'Yard row Y4'),
+    Z('YARD', 'Structural Steel Sections', 'HEB 300 beams, 12 m', 'EA', 320, 'Yard row Y5'),
+    Z('YARD', 'Spare Parts Containers', '20 ft and 40 ft containers', 'EA', 12, 'Container line'),
     Z('QC', 'Valve Shipment Awaiting Inspection', 'PO 4500, 18 pieces', 'EA', 18, 'Inspection area'),
     Z('QC', 'Cable on Hold (Non-Conformance)', 'Missing test certificate', 'RL', 3, 'Hold area'),
   ];
@@ -173,7 +180,7 @@
     const nq = norm(q);
     if (!nq) return { slots: [], materials: [] };
     const slots = [];
-    if (/^[a-l](-|\d|$)/i.test(nq)) {
+    if (/^[a-n](-|\d|$)/i.test(nq)) {
       const cq = nq.toUpperCase().replace(/-/g, '');
       for (const s of B.SLOTS) if (s.code.replace(/-/g, '').startsWith(cq)) slots.push(s);
     }

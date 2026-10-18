@@ -34,6 +34,8 @@
   scene.add(sun);
 
   W.build(scene);
+  W.buildYard(scene);
+  B.actors.build(scene);
   S.init();
 
   function applyTheme() {
@@ -60,14 +62,16 @@
 
   // ---------- Camera ----------
   const VIEWS = [
-    { id: 'overview', name: 'Overview', pos: [-62, 70, 92], tgt: [2, 0, 2] },
-    { id: 'top', name: 'Plan view', pos: [0, 145, 0.1], tgt: [0, 0, 0] },
-    { id: 'rcv', name: 'Receiving', pos: [-30, 20, -2], tgt: [-40, 0, -29] },
-    { id: 'rack', name: 'Racking', pos: [-48, 22, 34], tgt: [2, 3, 0] },
-    { id: 'aisle', name: 'In an aisle', pos: [-30, 2.6, -12.2], tgt: [14, 3.4, -12.2] },
-    { id: 'pipe', name: 'Pipe yard', pos: [-76, 17, 28], tgt: [-46, 1, 13] },
-    { id: 'haz', name: 'Hazmat', pos: [28, 18, 44], tgt: [48, 0, 19] },
-    { id: 'dsp', name: 'Shipping', pos: [4, 20, 62], tgt: [5, 0, 29] },
+    { id: 'overview', name: 'Overview', pos: [-78, 84, 112], tgt: [14, 0, 2] },
+    { id: 'top', name: 'Plan view', pos: [22, 205, 0.1], tgt: [22, 0, 0] },
+    { id: 'rcv', name: 'Receiving', pos: [-36, 21, -6], tgt: [-46, 0, -34] },
+    { id: 'rack', name: 'Racking', pos: [-58, 24, 40], tgt: [2, 3, 0] },
+    { id: 'aisle', name: 'In an aisle', pos: [-36, 2.6, -16.2], tgt: [16, 3.4, -16.2] },
+    { id: 'pipe', name: 'Pipe yard', pos: [-88, 18, 34], tgt: [-54, 1, 15] },
+    { id: 'haz', name: 'Hazmat', pos: [34, 18, 52], tgt: [56, 0, 20] },
+    { id: 'dsp', name: 'Shipping', pos: [6, 20, 70], tgt: [6, 0, 34] },
+    { id: 'yard', name: 'Open yard', pos: [58, 42, 78], tgt: [96, 0, 2] },
+    { id: 'team', name: 'Team', pos: [4, 6.5, -23.2], tgt: [-9, 1, -32] },
   ];
   let fly = null, follow = null;
   function flyTo(pos, tgt, dur) {
@@ -111,12 +115,25 @@
       clearViewPressed();
     }
   }
+  function focusActor(id, followIt) {
+    const a = B.actors.byId(id);
+    if (!a) return;
+    selected = { type: 'actor', id };
+    W.clearHighlight();
+    P.showActor(a);
+    if (followIt) {
+      const y = B.actors.y(a);
+      flyTo([a.x - 8, y + (a.kind === 'drone' ? 7 : 5), a.z + 9], [a.x, y, a.z], 1.1);
+      setTimeout(() => { if (selected && selected.id === id) { fly = null; follow = a; } }, 1150);
+      clearViewPressed();
+    }
+  }
   function focusForklift(n) {
     selected = { type: 'forklift', n };
     W.clearHighlight();
     P.showForklift(n);
   }
-  B.ui = { focusSlot, focusZone, setView };
+  B.ui = { focusSlot, focusZone, setView, focusActor };
 
   const ray = new T.Raycaster();
   const mouse = new T.Vector2();
@@ -139,6 +156,7 @@
     if (pk.type === 'slot') return pk.s.code + (pk.s.item >= 0 ? ': ' + B.ITEMS[pk.s.item].name : ' (empty)');
     if (pk.type === 'zone') return B.zoneById(pk.id).name;
     if (pk.type === 'forklift') return 'Forklift ' + pk.n;
+    if (pk.type === 'actor') { const a = B.actors.byId(pk.id); return a.name + ' · ' + a.role; }
     return '';
   }
   let down = null, hoverReq = null;
@@ -152,6 +170,7 @@
     if (pk.type === 'slot') focusSlot(pk.s, false);
     else if (pk.type === 'zone') focusZone(pk.id, false);
     else if (pk.type === 'forklift') focusForklift(pk.n);
+    else if (pk.type === 'actor') focusActor(pk.id, false);
     if (innerWidth <= 900) $('details').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
   });
   renderer.domElement.addEventListener('pointermove', (e) => {
@@ -177,11 +196,13 @@
 
   // ---------- Panel ----------
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-slot],[data-zone],[data-copy],[data-follow]');
+    const t = e.target.closest('[data-slot],[data-zone],[data-copy],[data-follow],[data-actor],[data-follow-actor]');
     if (!t) return;
     stopTour();
     if (t.dataset.slot) focusSlot(B.SLOTS[+t.dataset.slot]);
     else if (t.dataset.zone) focusZone(t.dataset.zone);
+    else if (t.dataset.actor) focusActor(t.dataset.actor, true);
+    else if (t.dataset.followActor) { const a = B.actors.byId(t.dataset.followActor); if (a) { fly = null; follow = a; } }
     else if (t.dataset.follow) { const f = S.forklifts.find((q) => q.n === +t.dataset.follow); if (f) { fly = null; follow = f; } }
     else if (t.dataset.copy) {
       const txt = t.dataset.copy;
@@ -194,11 +215,12 @@
   q.addEventListener('input', () => P.renderSearch(q.value));
   q.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
-    const first = $('results').querySelector('[data-slot],[data-zone]');
+    const first = $('results').querySelector('[data-slot],[data-zone],[data-actor]');
     if (first) first.click();
   });
   P.renderExamples((v) => { q.value = v; P.renderSearch(v); });
   P.renderZones();
+  P.renderTeam();
   P.renderLegend(false);
   P.showWelcome();
 
@@ -226,7 +248,7 @@
   syncDock();
 
   const KPI = [
-    ['occ', 'Rack occupancy', 'of 2,400 positions'], ['received', 'Pallets put away', 'since stats reset'], ['shipped', 'Pallets shipped', 'loaded on trucks'],
+    ['occ', 'Rack occupancy', 'of 3,360 positions'], ['received', 'Pallets put away', 'since stats reset'], ['shipped', 'Pallets shipped', 'loaded on trucks'],
     ['open', 'Open tasks', 'put-away + picking'], ['util', 'Forklift utilisation', 'fleet average'], ['cycle', 'Order cycle time', 'minutes, order to truck'],
   ];
   $('kpis').innerHTML = KPI.map(([k, n, d]) => '<div class="kpi"><small>' + n + '</small><b id="k_' + k + '">–</b><em>' + d + '</em></div>').join('');
@@ -243,10 +265,12 @@
     // Re-render the panel only when its content changes, so clicks are not lost
     let key = '';
     if (selected && selected.type === 'forklift') { const d = S.describeForklift(selected.n); key = d ? d.status + d.detail + Math.round(d.util * 100) : 'x'; }
+    if (selected && selected.type === 'actor') { const a = B.actors.byId(selected.id); key = a.status + '|' + Math.floor(a.scans || 0) + '|' + (a.trips || 0) + '|' + Math.round(a.battery || 0); }
     if (selected && selected.type === 'slot') key = selected.s.item + '|' + selected.s.reserved + '|' + selected.s.qty;
     if (selected && key !== lastDetailKey) {
       lastDetailKey = key;
       if (selected.type === 'forklift') P.showForklift(selected.n);
+      else if (selected.type === 'actor') P.showActor(B.actors.byId(selected.id));
       else if (selected.type === 'slot') P.showSlot(selected.s);
     }
     const zk = B.ZONES.map((z) => { const o = P.zoneOccupancy(z.id); return o == null ? '' : Math.round(o * 100); }).join(',');
@@ -296,16 +320,18 @@
 
   // ---------- Guided tour ----------
   const TOUR = [
-    ['overview', null, 'Building 100 from outside', 'A 120 x 70 m materials warehouse. Stock arrives through 4 doors on the north side and leaves through 4 doors on the south side. Yellow lines mark the forklift lanes.'],
+    ['overview', null, 'Building 100 from outside', 'A 138 x 80 m materials warehouse with an open storage yard beside it. Stock arrives through 4 doors on the north side and leaves through 4 on the south side.'],
     ['rcv', 'RCV', 'Receiving', 'Inbound trucks back onto the doors and their pallets are unloaded into the staging lane. A door light turns red while the door is occupied.'],
-    [null, 'QC', 'Quality inspection', 'Material is checked against the purchase order here. A green tag means accepted, red means on hold for non-conformance.'],
-    ['rack', 'RACK', 'Pallet racking', '12 rows, A to L, each with 20 bays on 5 levels. Pallet colour shows the material category, and the yellow letters on the row ends tell you which row you are looking at.'],
-    ['aisle', null, 'Inside an aisle', 'This is the operator view down an aisle. Drag to look around and click any pallet to see its contents, quantity and material number.'],
+    [null, 'QC', 'Quality inspection', 'Material is checked against the purchase order here. A green tag means accepted, red means on hold.'],
+    ['rack', 'RACK', 'Pallet racking', '14 rows, A to N, each with 24 bays on 5 levels. Forklifts handle the heavy pallets; colour shows the material category.'],
+    ['aisle', null, 'Inside an aisle', 'The operator view down an aisle. Watch for Drone D1 counting pallets here. Click any pallet to see its contents.'],
+    ['team', null, 'The team', 'Mansour and Mohsen carry the light cartons, Abdullah supervises with his tea, Nasser runs the stock system, and Ghazi stops by to chat with everyone.'],
     ['pipe', 'PIPE', 'Pipe yard', 'Cantilever racks hold bundles of 12 m pipe on three arm levels.'],
-    [null, 'SHELF', 'Small parts store', 'Bin shelving for small spares such as O-rings, fuses and needle bearings.'],
-    ['haz', 'HAZ', 'Hazardous materials cage', 'A fenced cage with a containment floor. Drums are colour-coded by hazard class and gas cylinders are chained in a rack.'],
-    ['dsp', 'DSP', 'Shipping and issue', 'Forklifts gather the pallets for each issue order in front of a door, then a truck arrives and loads them.'],
-    ['overview', null, 'Your turn', 'Search for a material in the left panel, or change the workload and forklift count at the bottom and watch the indicators respond.'],
+    [null, 'SHELF', 'Small parts store', 'Bin shelving for small spares. Workers carry these cartons by hand to the shipping lanes.'],
+    ['haz', 'HAZ', 'Hazardous materials cage', 'A fenced cage with a containment floor. Drums are colour-coded by hazard class.'],
+    ['yard', 'YARD', 'Open storage yard', 'Line pipe, cable drums, steel and containers outside. Drone D2 surveys the yard from 16 m.'],
+    ['dsp', 'DSP', 'Shipping and issue', 'Forklifts gather the pallets for each issue order in front of a door, then a truck loads them.'],
+    ['overview', null, 'Your turn', 'Search for a material or a person, or change the workload and forklift count at the bottom and watch the indicators respond.'],
   ];
   let tourI = -1, tourT = 0;
   const DWELL = 9;
@@ -351,6 +377,7 @@
   const ease = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
   function frame(dt) {
     S.update(dt);
+    if (S.st.running) B.actors.update(dt * (S.st.speed >= 20 ? 2 : 1));
     if (fly) {
       fly.k = Math.min(1, fly.k + dt / fly.dur);
       const e = ease(fly.k);
@@ -359,7 +386,7 @@
       if (fly.k >= 1) fly = null;
     }
     if (follow) {
-      const tgt = new T.Vector3(follow.x, 1.5, follow.z);
+      const tgt = new T.Vector3(follow.x, follow.kind === 'drone' ? follow.y : 1.5, follow.z);
       const off = camera.position.clone().sub(controls.target);
       controls.target.lerp(tgt, 0.12);
       camera.position.copy(controls.target).add(off);
@@ -393,7 +420,7 @@
     fly = null;
     B.capture = {
       step: (dt) => frame(dt),
-      flyTo, setView, focusSlot, focusZone, focusForklift, showTour, stopTour, camera, controls,
+      flyTo, setView, focusSlot, focusZone, focusForklift, focusActor, showTour, stopTour, camera, controls,
       follow: (n) => { const f = S.forklifts.find((q) => q.n === n); fly = null; follow = f || null; },
       cine: (on) => document.body.classList.toggle('cine', on),
       jump: (pos, tgt) => { fly = null; follow = null; camera.position.set(...pos); controls.target.set(...tgt); },
