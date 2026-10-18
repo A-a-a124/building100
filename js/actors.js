@@ -180,12 +180,54 @@
     mesh.rotation.y += d * Math.min(1, dt * 6);
   }
 
-  // Abdullah: stands by the office with a glass of tea, watching the team
+  // walk a.path at a.speed; returns true when the last point is reached
+  function walkPath(a, dt) {
+    const p = a.path[0];
+    if (!p) return true;
+    const dx = p.x - a.x, dz = p.z - a.z, d = Math.hypot(dx, dz), st = a.speed * dt;
+    if (d <= st) { a.x = p.x; a.z = p.z; a.path.shift(); }
+    else { a.x += (dx / d) * st; a.z += (dz / d) * st; a.head = Math.atan2(dx, dz); }
+    a.phase = (a.phase || 0) + dt * a.speed * 5.2;
+    return a.path.length === 0;
+  }
+  function officePoints() {
+    const o = B.zoneById('OFF');
+    const doorX = o.x[1] - 1.5, coffee = { x: o.x[0] + 1.2, z: o.z[0] + 1.2 };
+    return { out: { x: doorX, z: o.z[1] + 0.8 }, inside: { x: doorX, z: o.z[1] - 1.0 }, back: { x: doorX, z: o.z[0] + 3.2 }, coffee,
+      spot2: { x: coffee.x + 1.3, z: coffee.z + 0.7 }, spot3: { x: coffee.x + 0.3, z: coffee.z + 1.7 } };
+  }
+  function legsAndArms(u, walking, phase) {
+    const sw = walking ? Math.sin(phase) * 0.5 : 0;
+    u.legL.rotation.x = sw; u.legR.rotation.x = -sw;
+    u.armL.rotation.x = -sw * 0.8; u.elbowL.rotation.x = -0.2;
+    return sw;
+  }
+
+  // Abdullah: co-op student who watches the team with a glass of tea and joins Nasser for coffee
   function updateWatcher(a, dt) {
     const u = a.mesh.userData;
     a.t += dt;
+    const nasser = A.byId('nasser');
+    const P = officePoints();
+    if (a.state === 'watch' && nasser && nasser.state === 'toCoffee') { a.state = 'toCoffee'; a.t = 0; a.path = [P.out, P.inside, P.back, P.spot2]; }
+    if (a.state === 'toCoffee' || a.state === 'return') {
+      const done = walkPath(a, dt);
+      legsAndArms(u, true, a.phase);
+      u.armR.rotation.x = -0.2; u.armR.rotation.z = -0.12; u.elbowR.rotation.x = -1.45;
+      a.status = a.state === 'toCoffee' ? 'Heading to the coffee machine with Nasser' : 'Back to watching the floor';
+      if (done) { a.state = a.state === 'toCoffee' ? 'coffee' : 'watch'; a.t = 0; }
+      a.mesh.position.set(a.x, Math.abs(Math.sin(a.phase)) * 0.03, a.z);
+      turn(a.mesh, a.head, dt);
+      return;
+    }
+    if (a.state === 'coffee') {
+      a.head = Math.atan2(nasser.x - a.x, nasser.z - a.z);
+      if (nasser.state === 'back' || nasser.state === 'desk') { a.state = 'return'; a.t = 0; a.path = [P.back, P.inside, P.out, { x: a.homeX, z: a.homeZ }]; }
+    }
+    legsAndArms(u, false, 0);
+    a.mesh.position.set(a.x, 0, a.z);
     const watch = A.list.filter((q) => q.watched).sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0];
-    if (watch) a.head = Math.atan2(watch.x - a.x, watch.z - a.z);
+    if (a.state === 'watch' && watch) a.head = Math.atan2(watch.x - a.x, watch.z - a.z);
     turn(a.mesh, a.head, dt * 0.5);
     const sip = (a.t % 7) / 7, k = sip < 0.12 ? sip / 0.12 : sip < 0.3 ? 1 : sip < 0.42 ? 1 - (sip - 0.3) / 0.12 : 0;
     u.armR.rotation.x = lerp(-0.2, -0.75, k);
@@ -193,7 +235,8 @@
     u.elbowR.rotation.x = lerp(-1.45, -2.35, k);
     u.armL.rotation.x = 0.05;
     u.elbowL.rotation.x = -0.15;
-    a.status = k > 0.5 ? 'Sipping tea' : watch ? 'Watching ' + watch.name : 'Watching the floor';
+    if (a.state === 'coffee') a.status = 'Having coffee with Nasser';
+    else a.status = k > 0.5 ? 'Sipping tea' : watch ? 'Watching ' + watch.name : 'Watching the floor';
   }
 
   // Nasser: works at his computer, gets up only to make coffee
@@ -208,10 +251,16 @@
       return false;
     };
     let sitting = false, walking = false;
-    if (st === 'desk') { sitting = true; a.head = Math.PI; a.status = 'Working at his computer'; if (a.t > 22) { a.state = 'toCoffee'; a.t = 0; } }
-    else if (st === 'toCoffee') { walking = true; a.status = 'Going to make coffee'; if (go(a.coffee.x, a.coffee.z)) { a.state = 'brew'; a.t = 0; } }
-    else if (st === 'brew') { a.head = Math.PI; a.status = 'Making coffee'; if (a.t > 5) { a.state = 'back'; a.t = 0; a.cup.visible = true; } }
-    else if (st === 'back') { walking = true; a.status = 'Back to his desk with a coffee'; if (go(a.seat.x, a.seat.z)) { a.state = 'desk'; a.t = 0; a.cup.visible = false; } }
+    const gap = { x: a.seat.x + 1.6, z: a.seat.z + 0.2 }, gap2 = { x: a.seat.x + 1.6, z: a.coffee.z + 2.0 };
+    if (st === 'desk') { sitting = true; a.head = Math.PI; a.status = 'Working at his computer'; if (a.t > 22) { a.state = 'toCoffee'; a.t = 0; a.path = [gap, gap2, { x: a.coffee.x, z: a.coffee.z }]; } }
+    else if (st === 'toCoffee') { walking = true; a.status = 'Going to make coffee'; if (walkPath(a, dt)) { a.state = 'brew'; a.t = 0; } }
+    else if (st === 'brew') {
+      a.head = Math.PI; a.status = 'Making coffee';
+      const ab = A.byId('abdullah'), waiting = ab && (ab.state === 'toCoffee' || (ab.state === 'coffee' && ab.t < 6));
+      if (waiting && ab.state === 'coffee') { a.head = Math.atan2(ab.x - a.x, ab.z - a.z); a.status = 'Chatting with Abdullah over coffee'; }
+      if (a.t > 5 && !waiting) { a.state = 'back'; a.t = 0; a.cup.visible = true; a.path = [gap2, gap, { x: a.seat.x, z: a.seat.z }]; }
+    }
+    else if (st === 'back') { walking = true; a.status = 'Back to his desk with a coffee'; if (walkPath(a, dt)) { a.state = 'desk'; a.t = 0; a.cup.visible = false; } }
     const sw = walking ? Math.sin(a.phase) * 0.5 : 0;
     u.legL.rotation.x = sitting ? -1.45 : sw;
     u.legR.rotation.x = sitting ? -1.45 : -sw;
@@ -246,10 +295,20 @@
     if (t.id === 'nasser') { const o = B.zoneById('OFF'); return { x: t.seat.x, z: o.z[1] + 0.9 }; }
     return { x: t.x + 1.1, z: t.z + 0.6 };
   }
+  // next person to visit: the nearest one he has not talked to recently
+  function pickNext(a, others) {
+    a.recent = a.recent || [];
+    const pool = others.filter((q) => !a.recent.includes(q.id));
+    const next = pool.sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0] || others[0];
+    a.recent.push(next.id);
+    if (a.recent.length > 4) a.recent.shift();
+    a.ti = others.indexOf(next);
+  }
   function updateChatter(a, dt) {
     const u = a.mesh.userData;
     a.t += dt;
     const others = A.list.filter((q) => q.kind === 'person' && q !== a);
+    if (a.ti < 0) pickNext(a, others);
     const tgt = others[a.ti % others.length];
     let walking = false;
     if (a.state === 'chat') {
@@ -260,9 +319,38 @@
       u.legL.rotation.x = u.legR.rotation.x = 0;
       a.bubble.visible = Math.floor(a.t * 1.6) % 3 !== 2;
       a.status = 'Chatting with ' + (tgt.anon ? 'a warehouse worker' : tgt.name);
-      if (a.t > 6.5 || Math.hypot(tgt.x - a.x, tgt.z - a.z) > 4) { a.ti++; a.state = 'go'; a.path = null; a.t = 0; a.bubble.visible = false; u.armR.rotation.z = 0; }
+      // workers stop what they are doing and turn to him
+      if (tgt.update === updateWalker) { tgt.wait = Math.max(tgt.wait, 0.25); tgt.head = Math.atan2(a.x - tgt.x, a.z - tgt.z); tgt.status = 'Being chatted to by Ghazi'; }
+      if (a.t > 6.5 || Math.hypot(tgt.x - a.x, tgt.z - a.z) > 4) {
+        pickNext(a, others); a.chats = (a.chats || 0) + 1; a.t = 0; a.bubble.visible = false; u.armR.rotation.z = 0;
+        const P = officePoints();
+        if (a.chats % 3 === 0) { a.state = 'toCoffee'; a.path = planTo(a, P.out).concat([P.out, P.inside, P.back, P.spot3]); }
+        else { a.state = 'go'; a.path = null; if (a.chats % 3 === 2) a.cup.visible = false; }
+      }
+    } else if (a.state === 'toCoffee' || a.state === 'leave') {
+      walking = true;
+      const done = walkPath(a, dt);
+      const sw = legsAndArms(u, true, a.phase);
+      u.armR.rotation.x = a.cup.visible ? -0.3 : sw * 0.8; u.elbowR.rotation.x = a.cup.visible ? -1.4 : -0.2;
+      a.status = a.state === 'toCoffee' ? 'Off to make himself a coffee' : 'Coffee in hand, looking for someone to talk to';
+      if (done) { if (a.state === 'toCoffee') { a.state = 'brew'; a.t = 0; } else { a.state = 'go'; a.path = null; } }
+    } else if (a.state === 'brew') {
+      a.head = Math.PI;
+      a.status = 'Making himself a coffee';
+      u.legL.rotation.x = u.legR.rotation.x = 0;
+      u.armR.rotation.x = -0.6; u.elbowR.rotation.x = -0.8;
+      if (a.t > 5) { const P = officePoints(); a.cup.visible = true; a.state = 'leave'; a.t = 0; a.path = [P.back, P.inside, P.out]; }
     } else {
-      if (!a.path) a.path = planTo(a, chatSpot(tgt)).concat([chatSpot(tgt)]);
+      // give up on anyone he cannot catch and try the next person
+      if (a.t > 40) { pickNext(a, others); a.t = 0; a.path = null; }
+      const tgt2 = others[a.ti % others.length];
+      if (tgt2 !== tgt) return;
+      const cs = chatSpot(tgt);
+      a.rp = (a.rp || 0) + dt;
+      const moved = !a.goal || Math.hypot(cs.x - a.goal.x, cs.z - a.goal.z) > 1.5;
+      if (!a.path || (a.rp > 2 && moved)) { a.rp = 0; a.goal = cs; a.path = planTo(a, cs).concat([cs]); }
+      // close enough: walk straight at the person
+      if (Math.hypot(cs.x - a.x, cs.z - a.z) < (tgt.id === 'nasser' ? 3.5 : 9)) a.path = [cs];
       const p = a.path[0];
       const dx = p.x - a.x, dz = p.z - a.z, d = Math.hypot(dx, dz), st = a.speed * dt;
       if (d <= st) { a.x = p.x; a.z = p.z; a.path.shift(); }
@@ -393,9 +481,9 @@
     people[2].mesh.add(cart);
     people[2].cartLoad = load;
 
-    const abdullah = { id: 'abdullah', kind: 'person', name: 'Abdullah', role: 'Shift supervisor', x: -2, z: -30.6, head: 0, t: 0,
-      about: 'Keeps an eye on the whole floor from beside the office, always with a glass of tea in hand.',
-      mesh: makePerson({ height: 1.88, girth: 1.32, skin: SKIN.arab, thobe: true, hat: 'ghutra', label: 'Abdullah' }), update: updateWatcher, status: 'Watching the floor' };
+    const abdullah = { id: 'abdullah', kind: 'person', name: 'Abdullah', role: 'Co-op student', x: -2, z: -30.6, homeX: -2, homeZ: -30.6, head: 0, t: 0, state: 'watch', speed: 1.3, phase: 0, path: null,
+      about: 'Co-op student learning how the floor runs. Watches the team with a glass of tea and joins Nasser at the coffee machine.',
+      mesh: makePerson({ height: 1.88, girth: 1.32, skin: SKIN.arab, shirt: '#ff8a1f', pants: '#26303b', vest: true, hat: 'helmet', hatColor: '#ffffff', label: 'Abdullah' }), update: updateWatcher, status: 'Watching the floor' };
     const tea = new T.Mesh(new T.CylinderGeometry(0.03, 0.025, 0.08, 12), new T.MeshStandardMaterial({ color: '#b5541f', transparent: true, opacity: 0.85, roughness: 0.1 }));
     tea.position.set(0, -0.33 * abdullah.mesh.userData.s, 0.07);
     tea.scale.setScalar(1.6);
@@ -422,13 +510,17 @@
     nasser.mesh.userData.elbowR.add(nasser.cup);
     nasser.mesh.position.set(seat.x, 0, seat.z);
 
-    const ghazi = { id: 'ghazi', kind: 'person', name: 'Ghazi', role: 'Always passing by', x: 10, z: -25.8, head: 0, t: 0, ti: 0, state: 'go', speed: 1.1, phase: 0, path: null,
+    const ghazi = { id: 'ghazi', kind: 'person', name: 'Ghazi', role: 'Always passing by', x: 10, z: -25.8, head: 0, t: 0, ti: -1, state: 'go', speed: 1.7, phase: 0, path: null,
       about: 'Drops by to chat with everyone on the floor, named or not. Has not lifted a carton yet.',
       mesh: makePerson({ height: 1.76, girth: 1.08, skin: SKIN.tan, shirt: '#2e8b57', pants: '#3a3f47', hat: 'helmet', hatColor: '#ffffff', label: 'Ghazi' }), update: updateChatter, status: 'Looking for someone to talk to' };
+    ghazi.cup = new T.Mesh(new T.CylinderGeometry(0.04, 0.035, 0.1, 12), W.mat('#f2f2f2'));
+    ghazi.cup.visible = false;
     ghazi.bubble = W.makeLabel('…', { size: 0.5, bg: 'rgba(255,255,255,0.95)', fg: '#1a1300', weight: 700 });
     ghazi.bubble.position.set(0.45, 2.75, 0);
     ghazi.bubble.visible = false;
     ghazi.mesh.add(ghazi.bubble);
+    ghazi.cup.position.set(0, -0.33 * ghazi.mesh.userData.s, 0.06);
+    ghazi.mesh.userData.elbowR.add(ghazi.cup);
     ghazi.mesh.position.set(ghazi.x, 0, ghazi.z);
 
     const chg = B.zoneById('CHG'), yz = B.zoneById('YARD');
