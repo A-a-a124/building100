@@ -155,7 +155,7 @@
         continue;
       }
       task.fl = f;
-      f.task = task;
+      f.task = task; f.taskDist = 0;
       go(f, task.type === 'put' ? inPoint(task.from) : slotPoint(task.from), 'toPick');
     }
   }
@@ -227,6 +227,8 @@
 
   // ---------- Update ----------
   function moveAlong(f, dt) {
+    // safety module may hold a forklift back to yield to another truck or a person
+    if (B.safety && B.safety.blocked(f, dt)) return false;
     const sp = f.load ? 2.4 : 3.2;
     let left = sp * dt;
     while (left > 0 && f.path.length) {
@@ -237,6 +239,7 @@
       const step = Math.min(d, left);
       f.x += (dx / d) * step;
       f.z += (dz / d) * step;
+      f.dist = (f.dist || 0) + step; f.taskDist = (f.taskDist || 0) + step;
       left -= step;
     }
     return f.path.length === 0;
@@ -420,8 +423,9 @@
     const st = S.st;
     st.t += dt;
     const rate = S.RATES[st.rate];
-    if (R() < (rate.trucks / 3600) * dt) newInbound();
-    if (R() < (rate.orders / 3600) * dt) newOrder();
+    const shiftK = B.env ? B.env.rateFactor() : 1;
+    if (R() < (rate.trucks * shiftK / 3600) * dt) newInbound();
+    if (R() < (rate.orders * shiftK / 3600) * dt) newOrder();
     releaseOrders();
     S.orders.forEach((o) => {
       if (o.waitTruck) { const tr = spawnTruck('out', o.door); if (tr) { tr.order = o; tr.done = 0; o.waitTruck = false; } }

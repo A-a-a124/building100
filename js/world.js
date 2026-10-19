@@ -462,9 +462,10 @@
   };
 
   W.buildLabels = function () {
+    const tr = B.tr || ((t) => t);
     while (W.labels.children.length) W.labels.remove(W.labels.children[0]);
     B.ZONES.forEach((zn) => {
-      const l = W.makeLabel(zn.name, { stripe: zn.color, size: zn.id === 'RACK' || zn.id === 'YARD' ? 2.4 : 1.8 });
+      const l = W.makeLabel(tr(zn.name), { stripe: zn.color, size: zn.id === 'RACK' || zn.id === 'YARD' ? 2.4 : 1.8 });
       l.position.set((zn.x[0] + zn.x[1]) / 2, zn.labelY, (zn.z[0] + zn.z[1]) / 2);
       W.labels.add(l);
     });
@@ -476,11 +477,11 @@
       });
     });
     W.doorsIn.concat(W.doorsOut).forEach((d, k) => {
-      const l = W.makeLabel((k < 4 ? 'IN ' : 'OUT ') + d.n, { size: 0.9, depthTest: true });
+      const l = W.makeLabel(tr(k < 4 ? 'IN' : 'OUT') + ' ' + d.n, { size: 0.9, depthTest: true });
       l.position.set(d.x, 5.4, d.z + d.dir * 0.4);
       W.labels.add(l);
     });
-    const name = W.makeLabel('BUILDING 100 · MATERIALS WAREHOUSE', { size: 3.2, bg: 'rgba(242,179,27,0.95)', fg: '#1a1300', weight: 700 });
+    const name = W.makeLabel(tr('BUILDING 100 · MATERIALS WAREHOUSE'), { size: 3.2, bg: 'rgba(242,179,27,0.95)', fg: '#1a1300', weight: 700 });
     name.position.set(-22, 15, BZ0);
     W.labels.add(name);
   };

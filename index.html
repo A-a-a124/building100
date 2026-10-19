@@ -110,7 +110,7 @@ button { cursor: pointer; }
 .play { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--accent-strong); color: var(--accent-ink); display: grid; place-items: center; }
 .play svg { width: 18px; height: 18px; }
 .clock { font: 600 24px var(--f-mono); font-variant-numeric: tabular-nums; }
-.kpis { display: grid; grid-template-columns: repeat(6, minmax(96px, 1fr)); gap: 8px; flex: 1; min-width: 600px; }
+.kpis { display: grid; grid-template-columns: repeat(7, minmax(92px, 1fr)); gap: 8px; flex: 1; min-width: 690px; }
 .kpi { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: grid; gap: 2px; align-content: start; }
 .kpi small { color: var(--muted); font-size: 12px; }
 .kpi b { font: 600 20px var(--f-mono); font-variant-numeric: tabular-nums; }
@@ -200,7 +200,7 @@ body.cine .main { grid-template-columns: 1fr; }
       </div>
       <div class="dock">
         <div class="ctrl">
-          <div class="row"><button class="play" id="play" aria-label="Pause simulation"></button><div><small class="note">Simulation time</small><div class="clock" id="clock">07:00</div></div></div>
+          <div class="row"><button class="play" id="play" aria-label="Pause simulation"></button><div><small class="note">Simulation time</small><div class="clock" id="clock">07:00</div><small class="note" id="shift">Day shift</small></div></div>
         </div>
         <div class="ctrl">
           <div class="row"><label>Speed</label><div class="seg" id="speed"><button data-v="1">1x</button><button data-v="5">5x</button><button data-v="20">20x</button><button data-v="60">60x</button></div></div>
@@ -238,6 +238,16 @@ body.cine .main { grid-template-columns: 1fr; }
 <script src="js/world.js"></script>
 <script src="js/yard.js"></script>
 <script src="js/sim.js"></script>
+<script src="js/drones.js"></script>
 <script src="js/actors.js"></script>
 <script src="js/panel.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/importer.js"></script>
+<script src="js/slotting.js"></script>
+<script src="js/analysis.js"></script>
+<script src="js/safety.js"></script>
+<script src="js/walk.js"></script>
+<script src="js/env.js"></script>
+<script src="js/i18n-ar.js"></script>
+<script src="js/i18n.js"></script>

@@ -24,7 +24,8 @@
   controls.maxDistance = 320;
   controls.screenSpacePanning = true;
 
-  scene.add(new T.HemisphereLight(0xffffff, 0x9c8b6c, 0.72));
+  const hemi = new T.HemisphereLight(0xffffff, 0x9c8b6c, 0.72);
+  scene.add(hemi);
   const sun = new T.DirectionalLight(0xfff4e0, 0.95);
   sun.position.set(70, 110, 45);
   sun.castShadow = true;
@@ -33,6 +34,9 @@
   sun.shadow.bias = -0.0005;
   scene.add(sun);
 
+  // shared handles for the add-on modules (tools, safety, walk mode, environment)
+  B.three = { renderer, scene, camera, controls, sun, hemi, stage };
+  B.hooks = B.hooks || { frame: [] };
   W.build(scene);
   W.buildYard(scene);
   B.actors.build(scene);
@@ -44,7 +48,7 @@
     scene.fog = new T.Fog(c, 220, 520);
     // Desert ground follows the theme: bright sand by day, dusk tone in dark mode
     const bg = new T.Color(c);
-    W.sand.material.color.set(bg.r + bg.g + bg.b < 1.2 ? '#6b604d' : '#cbb68e');
+    W.sand.material.color.set(bg.r + bg.g + bg.b < 1.2 ? '#4d4538' : '#cbb68e');
     drawChart();
   }
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
@@ -133,7 +137,7 @@
     W.clearHighlight();
     P.showForklift(n);
   }
-  B.ui = { focusSlot, focusZone, setView, focusActor };
+  B.ui = { focusSlot, focusZone, setView, focusActor, flyTo, stopFollow: () => (follow = null), followObj: (o) => { fly = null; follow = o; } };
 
   const ray = new T.Raycaster();
   const mouse = new T.Vector2();
@@ -248,8 +252,9 @@
   syncDock();
 
   const KPI = [
-    ['occ', 'Rack occupancy', 'of 3,360 positions'], ['received', 'Pallets put away', 'since stats reset'], ['shipped', 'Pallets shipped', 'loaded on trucks'],
+    ['occ', 'Rack occupancy', 'of ' + B.SLOTS.length.toLocaleString('en-US') + ' positions'], ['received', 'Pallets put away', 'since stats reset'], ['shipped', 'Pallets shipped', 'loaded on trucks'],
     ['open', 'Open tasks', 'put-away + picking'], ['util', 'Forklift utilisation', 'fleet average'], ['cycle', 'Order cycle time', 'minutes, order to truck'],
+    ['near', 'Near misses', 'forklift and person'],
   ];
   $('kpis').innerHTML = KPI.map(([k, n, d]) => '<div class="kpi"><small>' + n + '</small><b id="k_' + k + '">–</b><em>' + d + '</em></div>').join('');
   let lastDetailKey = '', lastZoneKey = '';
@@ -262,6 +267,8 @@
     $('k_open').textContent = k.open;
     $('k_util').textContent = Math.round(k.util * 100) + '%';
     $('k_cycle').textContent = k.cycle == null ? '–' : k.cycle.toFixed(0);
+    $('k_near').textContent = S.st.nearMiss || 0;
+    if (B.env) $('shift').textContent = B.env.shiftName();
     // Re-render the panel only when its content changes, so clicks are not lost
     let key = '';
     if (selected && selected.type === 'forklift') { const d = S.describeForklift(selected.n); key = d ? d.status + d.detail + Math.round(d.util * 100) : 'x'; }
@@ -406,13 +413,12 @@
     }
     kpiT += dt;
     if (kpiT > 0.4) { kpiT = 0; renderKpis(); }
-    controls.update();
+    B.hooks.frame.forEach((h) => h(dt));
+    if (!(B.walk && B.walk.active)) controls.update();
     renderer.render(scene, camera);
   }
-  function loop() {
-    frame(Math.min(clock.getDelta(), 0.1));
-    requestAnimationFrame(loop);
-  }
+  // setAnimationLoop also drives VR sessions
+  function loop() { renderer.setAnimationLoop(() => frame(Math.min(clock.getDelta(), 0.1))); }
   resize();
   applyTheme();
   renderKpis();
