@@ -77,7 +77,7 @@
     'Dropping into the aisle': 'ينزل إلى الممر', 'Climbing above the racks': 'يصعد فوق الرفوف', 'Returning to the pad': 'عائد إلى المنصة', 'Landing': 'يهبط', 'Pre-flight checks': 'فحوصات ما قبل الطيران',
     'Positioning': 'يتموضع', 'Yard survey: counting pipe bundles, drums and containers': 'مسح الساحة: عدّ حزم الأنابيب والبكرات والحاويات',
     'Carries light cartons from the small parts store to the shipping lanes. First on the floor every shift, and runs on nothing but air and DZRT.': 'ينقل الكراتين الخفيفة من مخزن القطع الصغيرة إلى منطقة الشحن. أول واحد في الموقع كل وردية، ووقوده الهواء وDZRT فقط.',
-    'Moves small cartons from receiving to the bin shelving. Has never dropped a box.': 'ينقل الكراتين الصغيرة من الاستلام إلى الأرفف. ما طيّح ولا صندوق.',
+    'Moves small cartons from receiving to the bin shelving. Never dropped a box, never been in a hurry. The forklifts have learned to wait.': 'ينقل الكراتين الصغيرة من الاستلام إلى الأرفف. ما طيّح ولا صندوق، ولا أحد شافه مستعجل. حتى الرافعات تعلمت تنتظره.',
     'Co-op student learning how the floor runs. Watches the team with a glass of tea and joins Nasser at the coffee machine.': 'طالب تدريب تعاوني يتعلم كيف يدار المستودع. يراقب الفريق مع كوب الشاي ويرافق ناصر عند آلة القهوة.',
     'Runs the stock system from his computer and only leaves his desk to make coffee.': 'يدير نظام المخزون من حاسوبه، ولا يترك مكتبه إلا ليعمل قهوة.',
     'Drops by to chat with everyone on the floor, named or not. Has not lifted a carton yet.': 'يمر يسولف مع الجميع في المستودع. ما رفع ولا كرتون للحين.',

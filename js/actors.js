@@ -359,7 +359,7 @@
         look: { height: 1.93, girth: 0.8, skin: SKIN.dark, shirt: '#ff8a1f', vest: true, hat: 'helmet', label: 'Mansour' },
         route: [{ x: 49.5, z: -22, pick: true }, { x: ex, z: -22 }, { x: ex, z: dspZ }, { x: 20, z: dspZ, drop: true }, { x: ex, z: dspZ }, { x: ex, z: -22 }] },
       { id: 'mohsen', name: 'Mohsen', role: 'Material handler', watched: true, speed: 1.0, boxColor: '#b98a4e',
-        about: 'Moves small cartons from receiving to the bin shelving. Has never dropped a box.',
+        about: 'Moves small cartons from receiving to the bin shelving. Never dropped a box, never been in a hurry. The forklifts have learned to wait.',
         look: { height: 1.6, girth: 1.42, skin: SKIN.brown, shirt: '#ffb21f', vest: true, hat: 'helmet', label: 'Mohsen' },
         route: [{ x: -47, z: -31.2, pick: true }, { x: -47, z: frontZ }, { x: ex + 0.8, z: frontZ }, { x: ex + 0.8, z: -12 }, { x: 49.5, z: -12, drop: true }, { x: ex + 0.8, z: -12 }, { x: ex + 0.8, z: frontZ }, { x: -47, z: frontZ }] },
       { id: 'w1', name: 'Warehouse worker', role: 'Material handler', watched: true, speed: 1.2, boxColor: '#d4a86a', anon: true,
