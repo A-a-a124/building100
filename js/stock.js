@@ -72,6 +72,8 @@
     const total = rows.reduce((n, r) => n + r.annual, 0) || 1;
     let acc = 0;
     rows.slice().sort((a, b) => b.annual - a.annual).forEach((r) => { acc += r.annual; r.abc = acc / total <= 0.8 || acc === r.annual ? 'A' : acc / total <= 0.95 ? 'B' : 'C'; });
+    // the demand forecast can replace these levels with forecast-based ones
+    if (B.demand) rows.forEach((r) => { r.minBase = r.min; r.maxBase = r.max; if (B.demand.auto) { B.demand.adjust(r, LEAD[r.it.cat] || 8); r.below = r.qty < r.min; r.over = r.qty > r.max * 3; } });
     const zones = {};
     B.ZONE_ITEMS.forEach((z) => (zones[z.zone] = (zones[z.zone] || 0) + z.qty * zonePrice(z)));
     const rackValue = rows.reduce((n, r) => n + r.value, 0);
@@ -188,5 +190,5 @@
   css.textContent = '.dbody table.abc td { text-align: right; } .dbody .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 6px; } .stockcard { margin-top: 10px; }';
   document.head.appendChild(css);
   B.tools.add({ id: 'value', label: 'Stock value', render });
-  B.stock = { compute, price, sar, HOLD, setColourMode, mode: () => colourMode, ABC_COL };
+  B.stock = { compute, price, sar, HOLD, LEAD, setColourMode, mode: () => colourMode, ABC_COL };
 })();

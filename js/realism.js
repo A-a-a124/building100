@@ -101,9 +101,9 @@
 
   // ---------- sky dome follows the scene colour (day, dusk, night) ----------
   const skyMat = new T.ShaderMaterial({
-    side: T.BackSide, depthWrite: false, uniforms: { top: { value: new T.Color() }, hor: { value: new T.Color() } },
+    side: T.BackSide, depthWrite: false, uniforms: { top: { value: new T.Color() }, hor: { value: new T.Color() }, sunDir: { value: new T.Vector3(0, 1, 0) }, sunK: { value: 1 } },
     vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-    fragmentShader: 'uniform vec3 top; uniform vec3 hor; varying vec3 vP; void main(){ float k = smoothstep(-0.05, 0.55, vP.y); gl_FragColor = vec4(mix(hor, top, k), 1.0); }',
+    fragmentShader: 'uniform vec3 top; uniform vec3 hor; uniform vec3 sunDir; uniform float sunK; varying vec3 vP; void main(){ vec3 d = normalize(vP); float k = smoothstep(-0.05, 0.55, d.y); float s = max(dot(d, sunDir), 0.0); vec3 c = mix(hor, top, k) + sunK * (vec3(1.0, 0.86, 0.6) * pow(s, 24.0) * 0.35 + vec3(1.0, 0.97, 0.9) * pow(s, 900.0) * 1.2); gl_FragColor = vec4(c, 1.0); }',
   });
   const sky = new T.Mesh(new T.SphereGeometry(950, 32, 16), skyMat);
   sky.renderOrder = -10; scene.add(sky);
@@ -111,6 +111,8 @@
     const bg = scene.background && scene.background.isColor ? scene.background : new T.Color('#dbe2e8');
     const lum = bg.r + bg.g + bg.b;
     skyMat.uniforms.hor.value.copy(bg).lerp(new T.Color('#f4e9d6'), lum > 1.2 ? 0.25 : 0.05);
+    skyMat.uniforms.sunDir.value.copy(sun.position).normalize();
+    skyMat.uniforms.sunK.value = Math.max(0, Math.min(1, (hemi.intensity / baseHemi - 0.3) / 0.7));
     skyMat.uniforms.top.value.copy(bg).lerp(new T.Color(lum > 1.2 ? '#4a85cc' : '#0a1426'), 0.7);
   }
 

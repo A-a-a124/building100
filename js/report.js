@@ -25,6 +25,7 @@
     if (!f.drill) out.push(['Run an evacuation drill', 'No drill has been recorded this month. The model expects the building to clear in ' + fmt(Math.max(...B.evac.expected().map((q) => q.t)) / 60, 1) + ' minutes.']);
     else if (f.drill.t > 180) out.push(['Shorten evacuation time', 'The last drill took ' + fmt(f.drill.t / 60, 1) + ' minutes, over the 3 minute target. Add an exit or keep aisles to the exits clear.']);
     if (f.acc == null) out.push(['Start daily cycle counts', 'Counting about ' + fmt(f.weekCount / 5) + ' locations a day (drone D1 for the high levels) replaces the yearly stock-take.']);
+    if (B.roi) { const best = B.roi.evaluate().filter((r) => r.payback < Infinity && r.id !== 'custom').sort((a, b) => a.payback - b.payback)[0]; if (best) out.push(['Best investment', best.name + ' pays back ' + (best.once <= 0 ? 'right away' : best.payback < 1 ? 'in under a month' : 'in ' + fmt(best.payback, 0) + ' months') + ', with a 3-year net of ' + B.stock.sar(best.three) + '.']); }
     if (f.k.occ > 0.85) out.push(['Plan for space', 'Racking is ' + fmt(f.k.occ * 100, 0) + '% full. Check the Forecast tab for the date it reaches 95%.']);
     return out;
   }
