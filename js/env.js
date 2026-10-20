@@ -83,7 +83,7 @@
   B.hooks.frame.push((dt) => {
     if (!probed) {
       probeT += dt; probeN++;
-      if (probeT > 6) { probed = true; if (probeN / probeT < 24) { setLow(true, true); B.tools.toast('Switched to low-quality mode for smoother motion on this device'); } }
+      if (probeT > 4) { probed = true; if (probeN / probeT < 22) { setLow(true, true); B.tools.toast('Switched to low-quality mode for smoother motion on this device'); } }
     }
     if (!base || (themeT += dt) > 1) {
       themeT = 0;

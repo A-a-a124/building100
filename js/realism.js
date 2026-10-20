@@ -3,13 +3,18 @@
   const B = window.B100, W = B.world, S = B.sim, T = THREE;
   const { renderer, scene, sun, hemi } = B.three;
   const R = B.rng(512);
+  const CAPTURE = /[?&]capture/.test(location.search);
   const RACK = B.RACK, BLD = B.BUILDING;
   const maxAniso = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 4;
 
   // ---------- renderer ----------
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.98;
-  if (renderer.shadowMap.enabled) { sun.shadow.mapSize.set(4096, 4096); sun.shadow.radius = 3; sun.shadow.normalBias = 0.02; }
+  sun.shadow.normalBias = 0.02;
+  // the sun moves slowly: redraw the shadow map every few frames instead of every frame
+  renderer.shadowMap.autoUpdate = false;
+  let shadowN = 0;
+  B.hooks.frame.push(() => { if (renderer.shadowMap.enabled && (CAPTURE || ++shadowN % 3 === 1)) renderer.shadowMap.needsUpdate = true; });
 
   // image-based light from a simple bright hall, so metal and polished concrete pick up reflections
   (function environment() {
@@ -129,7 +134,7 @@
       M4.makeTranslation(x, 0.23, row.access < row.z ? za - 0.12 : zb + 0.12); guard.setMatrixAt(gi++, M4);
     }
   });
-  brace.castShadow = guard.castShadow = true; brace.receiveShadow = guard.receiveShadow = true;
+  brace.receiveShadow = guard.receiveShadow = true;
   scene.add(brace, guard);
   const endBar = W.mat('#f2b31b', { roughness: 0.5 });
   RACK.rows.forEach((row) => [RACK.x0 - 0.45, RACK.x0 + RACK.bays * RACK.bayW + 0.45].forEach((x) => {
@@ -149,14 +154,22 @@
   // ---------- roof trusses, purlins and sprinkler mains ----------
   const steel = W.mat('#5d6773', { metalness: 0.6, roughness: 0.45 }), red = W.mat('#b8261c', { roughness: 0.5, metalness: 0.2 });
   const roof = new T.Group();
-  for (let x = BLD.x0 + 11.5; x < BLD.x1; x += 11.5) {
-    const chord = new T.Mesh(new T.BoxGeometry(0.25, 0.35, BLD.z1 - BLD.z0), steel); chord.position.set(x, BLD.h - 0.2, 0); roof.add(chord);
-    const low = new T.Mesh(new T.BoxGeometry(0.18, 0.2, BLD.z1 - BLD.z0), steel); low.position.set(x, BLD.h - 1.7, 0); roof.add(low);
-    for (let z = BLD.z0; z < BLD.z1; z += 4) { const d = new T.Mesh(new T.BoxGeometry(0.08, 2.1, 0.08), steel); d.position.set(x, BLD.h - 0.95, z + 1); d.rotation.x = (z / 4) % 2 ? 0.75 : -0.75; roof.add(d); }
-  }
-  for (let z = BLD.z0 + 5; z < BLD.z1; z += 10) { const p = new T.Mesh(new T.BoxGeometry(BLD.x1 - BLD.x0, 0.12, 0.12), steel); p.position.set(0, BLD.h - 0.05, z); roof.add(p); }
-  [-22, 3, 28].forEach((z) => { const s = new T.Mesh(new T.CylinderGeometry(0.09, 0.09, BLD.x1 - BLD.x0, 10), red); s.rotation.z = Math.PI / 2; s.position.set(0, BLD.h - 2.2, z); roof.add(s); });
-  roof.traverse((o) => { if (o.isMesh) o.castShadow = false; });
+  const xs = []; for (let x = BLD.x0 + 11.5; x < BLD.x1; x += 11.5) xs.push(x);
+  const D = BLD.z1 - BLD.z0, zs = []; for (let z = BLD.z0; z < BLD.z1; z += 4) zs.push(z);
+  const chords = new T.InstancedMesh(new T.BoxGeometry(0.25, 0.35, D), steel, xs.length * 2);
+  const diags = new T.InstancedMesh(new T.BoxGeometry(0.08, 2.1, 0.08), steel, xs.length * zs.length);
+  let ci = 0, di = 0;
+  xs.forEach((x) => {
+    M4.makeTranslation(x, BLD.h - 0.2, 0); chords.setMatrixAt(ci++, M4);
+    M4.makeScale(0.72, 0.57, 1).setPosition(x, BLD.h - 1.7, 0); chords.setMatrixAt(ci++, M4);
+    zs.forEach((z) => { Q.setFromAxisAngle(new T.Vector3(1, 0, 0), (z / 4) % 2 ? 0.75 : -0.75); M4.compose(V.set(x, BLD.h - 0.95, z + 1), Q, SC.set(1, 1, 1)); diags.setMatrixAt(di++, M4); });
+  });
+  const zp = []; for (let z = BLD.z0 + 5; z < BLD.z1; z += 10) zp.push(z);
+  const purl = new T.InstancedMesh(new T.BoxGeometry(BLD.x1 - BLD.x0, 0.12, 0.12), steel, zp.length);
+  zp.forEach((z, k) => { M4.makeTranslation(0, BLD.h - 0.05, z); purl.setMatrixAt(k, M4); });
+  const spr = new T.InstancedMesh(new T.CylinderGeometry(0.09, 0.09, BLD.x1 - BLD.x0, 10), red, 3);
+  [-22, 3, 28].forEach((z, k) => { Q.setFromAxisAngle(new T.Vector3(0, 0, 1), Math.PI / 2); M4.compose(V.set(0, BLD.h - 2.2, z), Q, SC.set(1, 1, 1)); spr.setMatrixAt(k, M4); });
+  roof.add(chords, diags, purl, spr);
   scene.add(roof);
 
   // ---------- floor markings: pedestrian crossings and dock hatching ----------
