@@ -74,17 +74,11 @@
   fold.addEventListener('click', () => setFold((folded = !folded)));
   setFold(folded);
 
-  // switch to low quality on its own if the first seconds run slowly
-  let probeT = 0, probeN = 0, probed = CAPTURE || store.get('b100.low') != null;
 
   // ---------- frame ----------
   const night = new T.Color('#0a1019'), sandNight = new T.Color('#2c2822');
   let base = null, sandBase = null, themeT = 0, blink = 0;
   B.hooks.frame.push((dt) => {
-    if (!probed) {
-      probeT += dt; probeN++;
-      if (probeT > 4) { probed = true; if (probeN / probeT < 22) { setLow(true, true); B.tools.toast('Switched to low-quality mode for smoother motion on this device'); } }
-    }
     if (!base || (themeT += dt) > 1) {
       themeT = 0;
       base = new T.Color(getComputedStyle(document.documentElement).getPropertyValue('--scene').trim() || '#dbe2e8');

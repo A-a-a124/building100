@@ -2,7 +2,6 @@
 (function () {
   const B = window.B100, W = B.world, S = B.sim, T = THREE, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
-  const tr = (t) => (B.tr ? B.tr(t) : t);
   const BLD = B.BUILDING, WALK = 1.3, TARGET = 180;
   const EXITS = [
     { id: 'N1', x: -26, z: BLD.z0, nx: 0, nz: -1 }, { id: 'N2', x: 22, z: BLD.z0, nx: 0, nz: -1 },
@@ -120,7 +119,7 @@
     const markers = new T.Group(); W.scene.add(markers);
     POINTS.forEach((p) => {
       const ring = new T.Mesh(new T.RingGeometry(3, 3.6, 40), new T.MeshBasicMaterial({ color: '#27c26a', side: T.DoubleSide, toneMapped: false })); ring.rotation.x = -Math.PI / 2; ring.position.set(p.x, 0.08, p.z);
-      const lab = W.makeLabel(tr(p.id), { size: 1.2, bg: 'rgba(31,138,76,0.95)', weight: 700 }); lab.position.set(p.x, 3.4, p.z);
+      const lab = W.makeLabel((p.id), { size: 1.2, bg: 'rgba(31,138,76,0.95)', weight: 700 }); lab.position.set(p.x, 3.4, p.z);
       markers.add(ring, lab);
     });
     const R = B.rng(99);
@@ -134,7 +133,7 @@
     S.st.running = false;
     EXITS.forEach((e) => (e.blocked = Math.hypot(e.x - fire.x, e.z - fire.z) < fire.r));
     S.addLog('Fire alarm: ' + fire.name + '. Everyone to the assembly points.', 'warn');
-    document.getElementById('drTitle').textContent = tr('FIRE DRILL') + ' · ' + tr(fire.name);
+    document.getElementById('drTitle').textContent = ('FIRE DRILL') + ' · ' + (fire.name);
     banner.hidden = false;
     B.tools.isOpen('drill') && (document.getElementById('drawerClose').click());
     B.ui.setView('top');
@@ -174,7 +173,7 @@
     EXITS.forEach((e) => (e.sign.material.emissiveIntensity = e.blocked ? 0.1 : 0.6 + 0.6 * Math.abs(Math.sin(flash * 4))));
     const safe = drill.runners.filter((q) => q.safe != null).length, n = drill.runners.length;
     const mm = Math.floor(drill.t / 60), ss = Math.floor(drill.t % 60);
-    document.getElementById('drInfo').textContent = String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0') + ' · ' + safe + ' / ' + n + ' ' + tr('at the assembly points');
+    document.getElementById('drInfo').textContent = String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0') + ' · ' + safe + ' / ' + n + ' ' + ('at the assembly points');
     if (safe === n && !drill.finished) {
       drill.finished = true;
       const lastOut = drill.runners.slice().sort((p, q) => q.out - p.out)[0];
@@ -187,7 +186,7 @@
   });
   const mmss = (s) => Math.floor(s / 60) + ' min ' + String(Math.round(s % 60)).padStart(2, '0') + ' s';
   document.getElementById('drEnd').addEventListener('click', () => end());
-  document.getElementById('drSpeed').addEventListener('click', (e) => { if (!drill) return; drill.mult = drill.mult === 1 ? 4 : 1; e.target.textContent = tr('Speed') + ' ' + drill.mult + 'x'; });
+  document.getElementById('drSpeed').addEventListener('click', (e) => { if (!drill) return; drill.mult = drill.mult === 1 ? 4 : 1; e.target.textContent = ('Speed') + ' ' + drill.mult + 'x'; });
 
   function render(el) {
     const fire = FIRES[scenario], ex = expected(fire), worst = ex.reduce((m, q) => (q.t > m.t ? q : m), ex[0]);
@@ -223,7 +222,7 @@
     const Y = (v) => 220 - (v / max) * 190;
     ctx.clearRect(0, 0, c.width, c.height); ctx.font = '600 17px "IBM Plex Sans", sans-serif';
     ctx.strokeStyle = bad; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(60, Y(TARGET)); ctx.lineTo(810, Y(TARGET)); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = bad; ctx.fillText(tr('3 min target'), 700, Y(TARGET) - 8);
+    ctx.fillStyle = bad; ctx.fillText(('3 min target'), 700, Y(TARGET) - 8);
     pts.forEach((h, i) => { const x = 70 + i * bw, y = Y(h.t); ctx.fillStyle = h.t > TARGET ? bad : acc; ctx.fillRect(x, y, bw * 0.6, 220 - y); ctx.fillStyle = muted; ctx.fillText(Math.round(h.t) + ' s', x, y - 6); ctx.fillText('#' + (history.length - pts.length + i + 1), x, 244); });
   }
   B.tools.add({ id: 'drill', label: 'Emergency', render });

@@ -15,6 +15,9 @@
   // supplier lead time in weeks, by category
   const LEAD = { valve: 16, flange: 8, gasket: 6, elec: 20, mech: 10, inst: 14, ppe: 4, cons: 3 };
   const CRITICAL = /relief|control valve|motor|mechanical seal|eebd|breathing|transmitter|circuit breaker/i;
+  // yearly cost of keeping stock: rack space, money tied up, insurance, and the risk that old stock is never used
+  const HOLD = { space: 450, capital: 8, insurance: 1.5, obsSlow: 5, obsFrozen: 15 };
+  const holdOf = (v, days) => HOLD.space + v * (HOLD.capital + HOLD.insurance + (days >= 365 ? HOLD.obsFrozen : days >= 180 ? HOLD.obsSlow : 0)) / 100;
   const hash = (s) => { let h = 2166136261; for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
 
   const price = (it) => it.price || PRICE[it.name] || Math.round(CAT_PRICE[it.cat] * (0.5 + (hash(it.mat) % 100) / 100));
@@ -39,13 +42,14 @@
   function compute(force) {
     const now = performance.now();
     if (cache && !force && now - cacheT < 1500) return cache;
-    const rows = B.ITEMS.map((it) => ({ it, qty: 0, pallets: 0, value: 0, frozen: 0, slow: 0, days: 0, maxDays: 0, locs: [] }));
+    const rows = B.ITEMS.map((it) => ({ it, qty: 0, pallets: 0, value: 0, frozen: 0, slow: 0, days: 0, maxDays: 0, locs: [], hold: 0, holdFrozen: 0 }));
     const byRow = B.RACK.rows.map((r) => ({ letter: r.letter, value: 0, pallets: 0, frozen: 0 }));
     let frozenPallets = 0, slowPallets = 0;
     B.SLOTS.forEach((s) => {
       if (s.item < 0) return;
       const r = rows[s.item]; if (!r) return;
       const v = s.qty * price(r.it);
+      const hc = holdOf(v, s.days); r.hold += hc; if (s.days >= 365) r.holdFrozen += hc;
       r.qty += s.qty; r.pallets++; r.value += v; r.days += s.days; r.maxDays = Math.max(r.maxDays, s.days); r.locs.push(s);
       byRow[s.row].value += v; byRow[s.row].pallets++;
       if (s.days >= 365) { r.frozen += v; byRow[s.row].frozen += v; frozenPallets++; } else if (s.days >= 180) { r.slow += v; slowPallets++; }
@@ -74,6 +78,7 @@
     zones.RACK = rackValue;
     cache = {
       rows, byRow, zones, rackValue, total: Object.values(zones).reduce((a, b) => a + b, 0),
+      hold: rows.reduce((n, r) => n + r.hold, 0), holdFrozen: rows.reduce((n, r) => n + r.holdFrozen, 0),
       frozen: rows.reduce((n, r) => n + r.frozen, 0), slow: rows.reduce((n, r) => n + r.slow, 0), frozenPallets, slowPallets,
       below: rows.filter((r) => r.below && r.pallets >= 0), belowCritical: rows.filter((r) => r.below && r.critical),
     };
@@ -109,7 +114,7 @@
       <div class="chips"><span class="pill"><i style="color:${ABC_COL[r.abc]}"></i>Class ${r.abc}${r.xyz}</span>${st}${r.critical ? '<span class="pill warn"><i></i>Critical spare</span>' : ''}</div>
       <dl class="kv"><dt>This pallet</dt><dd>${sar(s.qty * r.price)}</dd><dt>Unit price</dt><dd>${sar(r.price)}</dd>
       <dt>Total on hand</dt><dd>${fmt(r.qty)} in ${r.pallets} locations</dd><dt>Min / max</dt><dd>${fmt(r.min)} / ${fmt(r.max)}</dd>
-      <dt>Average use</dt><dd>${fmt(r.weekly, 1)} a week</dd></dl></div>`);
+      <dt>Average use</dt><dd>${fmt(r.weekly, 1)} a week</dd><dt>Cost to keep</dt><dd>${sar(holdOf(s.qty * r.price, s.days))} a year</dd></dl></div>`);
   };
 
   // ---------- Stock value tab ----------
@@ -121,6 +126,11 @@
       <div class="row2"><div class="stat"><b>${sar(c.total)}</b><small>total stock value</small></div><div class="stat"><b>${sar(c.rackValue)}</b><small>in the pallet racking</small></div>
       <div class="stat"><b style="color:var(--bad)">${sar(c.frozen)}</b><small>frozen: not moved for a year (${fmt(c.frozenPallets)} pallets)</small></div>
       <div class="stat"><b>${sar(c.slow)}</b><small>slow: 6 to 12 months (${fmt(c.slowPallets)} pallets)</small></div></div>
+      <h4>What it costs to keep</h4><p>Every pallet costs money each year: its rack space, the cash tied up in it, insurance, and for old stock the risk it is never used.</p>
+      <div class="row2"><div class="stat"><b>${sar(c.hold)}</b><small>holding cost per year, racking</small></div><div class="stat"><b style="color:var(--bad)">${sar(c.holdFrozen)}</b><small>per year for frozen stock alone</small></div></div>
+      <p>Clearing the frozen pallets saves about <b>${sar(c.holdFrozen)}</b> a year and frees <b>${fmt(c.frozenPallets)}</b> pallet positions.</p>
+      <div class="row2"><label class="f">Rack space, SAR per pallet a year<input type="number" data-h="space" value="${HOLD.space}" min="0"></label><label class="f">Cost of capital, % a year<input type="number" data-h="capital" value="${HOLD.capital}" min="0" step="0.5"></label>
+      <label class="f">Insurance and handling, % a year<input type="number" data-h="insurance" value="${HOLD.insurance}" min="0" step="0.5"></label><label class="f">Obsolescence of frozen stock, % a year<input type="number" data-h="obsFrozen" value="${HOLD.obsFrozen}" min="0"></label></div>
       <h4>ABC / XYZ classes</h4><p><b>A B C</b> ranks materials by yearly consumption value (A = top 80%). <b>X Y Z</b> shows how steady demand is (X = steady, Z = irregular).</p>
       <table class="abc"><thead><tr><th></th><th class="num">X steady</th><th class="num">Y variable</th><th class="num">Z irregular</th></tr></thead><tbody>
       ${['A', 'B', 'C'].map((a) => '<tr><th><i class="dot" style="background:' + ABC_COL[a] + '"></i>' + a + '</th>' + ['X', 'Y', 'Z'].map((x) => { const q = cell(a, x); return '<td class="num">' + q.n + ' items<br><small>' + sar(q.v) + '</small></td>'; }).join('') + '</tr>').join('')}</tbody></table>
@@ -132,13 +142,14 @@
       <h4>Value by rack row</h4><canvas id="stRows" width="840" height="300"></canvas>
       <h4>Value by area</h4><table><tbody>${Object.entries(c.zones).sort((a, b) => b[1] - a[1]).map(([id, v]) => '<tr><td>' + P.esc(B.zoneById(id).name) + '</td><td class="num">' + sar(v) + '</td></tr>').join('')}</tbody></table>
       <div class="btnrow"><button class="btn" id="stAbc">${colourMode === 'abc' ? 'Back to category colours' : 'Colour pallets by ABC class'}</button><button class="btn" id="stCsv">Export ABC analysis (CSV)</button></div>`;
+    el.querySelectorAll('[data-h]').forEach((i) => i.addEventListener('change', () => { HOLD[i.dataset.h] = Math.max(0, +i.value || 0); compute(true); render(el); }));
     scatter(el.querySelector('#stScatter'), c);
     rowBars(el.querySelector('#stRows'), c);
     el.querySelectorAll('[data-slot]').forEach((tr) => tr.addEventListener('click', () => B.ui.focusSlot(B.SLOTS[+tr.dataset.slot])));
     el.querySelector('#stAbc').addEventListener('click', () => { setColourMode(colourMode === 'abc' ? '' : 'abc'); B.tools.toast(colourMode ? 'Pallets coloured by class: red A, amber B, green C' : 'Category colours restored'); render(el); });
     el.querySelector('#stCsv').addEventListener('click', () => {
-      const lines = ['Material,Description,Category,Class,On hand,Unit,Unit price SAR,Stock value SAR,Frozen value SAR,Weekly use,Min,Max,Status,Critical'];
-      c.rows.forEach((r) => lines.push([r.it.mat, '"' + r.it.name.replace(/"/g, '""') + '"', B.CATS[r.it.cat].name, r.abc + r.xyz, r.qty, r.it.unit, r.price, Math.round(r.value), Math.round(r.frozen), r.weekly.toFixed(2), r.min, r.max, r.below ? 'Below min' : r.over ? 'Overstock' : 'OK', r.critical ? 'Yes' : ''].join(',')));
+      const lines = ['Material,Description,Category,Class,On hand,Unit,Unit price SAR,Stock value SAR,Frozen value SAR,Holding cost SAR per year,Weekly use,Min,Max,Status,Critical'];
+      c.rows.forEach((r) => lines.push([r.it.mat, '"' + r.it.name.replace(/"/g, '""') + '"', B.CATS[r.it.cat].name, r.abc + r.xyz, r.qty, r.it.unit, r.price, Math.round(r.value), Math.round(r.frozen), Math.round(r.hold), r.weekly.toFixed(2), r.min, r.max, r.below ? 'Below min' : r.over ? 'Overstock' : 'OK', r.critical ? 'Yes' : ''].join(',')));
       B.tools.download('building100-abc-analysis.csv', lines.join('\n'));
     });
   }
@@ -177,5 +188,5 @@
   css.textContent = '.dbody table.abc td { text-align: right; } .dbody .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 6px; } .stockcard { margin-top: 10px; }';
   document.head.appendChild(css);
   B.tools.add({ id: 'value', label: 'Stock value', render });
-  B.stock = { compute, price, sar, setColourMode, mode: () => colourMode, ABC_COL };
+  B.stock = { compute, price, sar, HOLD, setColourMode, mode: () => colourMode, ABC_COL };
 })();

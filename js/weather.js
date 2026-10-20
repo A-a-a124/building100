@@ -3,7 +3,6 @@
   const B = window.B100, S = B.sim, T = THREE, P = B.panel;
   const { scene, sun, hemi, camera } = B.three;
   const fmt = (n, d) => B.tools.fmt(n, d);
-  const tr = (t) => (B.tr ? B.tr(t) : t);
   const CAPTURE = /[?&]capture/.test(location.search);
   const R = B.rng(31);
   const SEASONS = { summer: { name: 'Summer', lo: 31, hi: 47, dust: 0.05 }, mild: { name: 'Spring / autumn', lo: 23, hi: 36, dust: 0.03 }, winter: { name: 'Winter', lo: 11, hi: 23, dust: 0.015 } };
@@ -83,7 +82,7 @@
     if ((t += dt) > 0.5) {
       t = 0;
       chip.className = 'wxchip' + (w.dust ? ' dust' : heatBan() ? ' hot' : '');
-      chip.textContent = Math.round(w.temp) + '°C · ' + tr(w.dust ? 'Dust storm' : heatBan() ? 'Midday heat' : 'Clear') + ' · ' + Math.round(w.wind) + ' km/h';
+      chip.textContent = Math.round(w.temp) + '°C · ' + (w.dust ? 'Dust storm' : heatBan() ? 'Midday heat' : 'Clear') + ' · ' + Math.round(w.wind) + ' km/h';
     }
   });
 
@@ -99,7 +98,7 @@
     const s = SEASONS[w.season];
     el.innerHTML = `<h4>Weather in the yard</h4><p>The open yard works under the sky. Dust storms ground the yard drone, cut visibility and delay trucks on the road. In summer, outdoor work stops from 12:00 to 15:00 under the midday work ban.</p>
       <div class="row2"><div class="stat"><b>${Math.round(w.temp)}°C</b><small>temperature now</small></div><div class="stat"><b>${Math.round(w.wind)} km/h</b><small>wind</small></div>
-      <div class="stat"><b>${w.dust ? fmt(w.vis * 1000, 0) + ' m' : '10 km+'}</b><small>visibility</small></div><div class="stat"><b>${w.dust ? tr('Grounded') : tr('Flying')}</b><small>yard drone D2</small></div></div>
+      <div class="stat"><b>${w.dust ? fmt(w.vis * 1000, 0) + ' m' : '10 km+'}</b><small>visibility</small></div><div class="stat"><b>${w.dust ? ('Grounded') : ('Flying')}</b><small>yard drone D2</small></div></div>
       <label class="f">Season<select id="wxS">${Object.entries(SEASONS).map(([k, q]) => '<option value="' + k + '"' + (k === w.season ? ' selected' : '') + '>' + q.name + '</option>').join('')}</select></label>
       <canvas id="wxC" width="840" height="260"></canvas>
       <h4>Effect on the work right now</h4><ul style="margin:0;padding-inline-start:18px;font-size:13px;display:grid;gap:4px">
@@ -120,7 +119,7 @@
     const acc = cs.getPropertyValue('--accent-strong').trim(), muted = cs.getPropertyValue('--muted').trim(), bad = cs.getPropertyValue('--bad').trim();
     const X = (h) => 60 + (h / 24) * 760, Y = (v) => 220 - ((v - 5) / 45) * 190;
     ctx.clearRect(0, 0, c.width, c.height); ctx.font = '17px "IBM Plex Sans", sans-serif';
-    if (w.season === 'summer') { ctx.fillStyle = 'rgba(196,80,27,0.15)'; ctx.fillRect(X(12), 20, X(15) - X(12), 200); ctx.fillStyle = bad; ctx.fillText(tr('work ban'), X(12) + 4, 40); }
+    if (w.season === 'summer') { ctx.fillStyle = 'rgba(196,80,27,0.15)'; ctx.fillRect(X(12), 20, X(15) - X(12), 200); ctx.fillStyle = bad; ctx.fillText(('work ban'), X(12) + 4, 40); }
     ctx.strokeStyle = acc; ctx.lineWidth = 4; ctx.beginPath();
     for (let h = 0; h <= 24; h += 0.5) { const x = X(h), y = Y(tempAt(h)); h ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
     ctx.stroke();

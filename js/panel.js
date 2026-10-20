@@ -129,7 +129,7 @@
     const r = B.search(q);
     const out = [];
     const nq = q.trim().toLowerCase();
-    const people = B.actors.list.filter((a) => !a.anon && ((a.name + ' ' + (B.tr ? B.tr(a.name) : '')).toLowerCase().includes(nq) || a.role.toLowerCase().includes(nq)));
+    const people = B.actors.list.filter((a) => !a.anon && (a.name.toLowerCase().includes(nq) || a.role.toLowerCase().includes(nq)));
     if (people.length) out.push('<div class="res"><b>People and drones</b><div class="locs">' + people.map((a) => '<button class="loc" data-actor="' + a.id + '">' + esc(a.name) + '</button>').join('') + '</div></div>');
     if (r.slots.length) {
       out.push('<div class="res"><b>Locations starting with <span class="code">' + esc(q.toUpperCase()) + '</span></b><div class="locs">' + r.slots.slice(0, 40).map(locBtn).join('') + '</div></div>');

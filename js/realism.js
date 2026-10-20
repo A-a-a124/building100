@@ -224,7 +224,7 @@
     const cy = B.three.camera.position.y;
     sky.position.copy(B.three.camera.position);
     roof.visible = W.shell.visible && (cy < BLD.h - 1.2 || cy > 60);
-    if ((t += dt) < 0.5) return;
+    if ((t += dt) < 1.5) return;
     t = 0;
     crew(); sweep(); paintSky();
     const k = Math.max(0.12, Math.min(1, hemi.intensity / baseHemi));

@@ -2,7 +2,6 @@
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
-  const tr = (t) => (B.tr ? B.tr(t) : t);
   const CAPTURE = /[?&]capture/.test(location.search);
   const R = B.rng(77);
   // failure rates are compressed so breakdowns show up within a demo session; set real figures in the Fleet tab
@@ -16,7 +15,7 @@
     if (f.mesh.userData.downTag) f.mesh.remove(f.mesh.userData.downTag);
     f.mesh.userData.downTag = null;
     if (!text) return;
-    const l = W.makeLabel(tr(text), { size: 0.62, bg: 'rgba(200,30,30,0.95)', weight: 700 });
+    const l = W.makeLabel((text), { size: 0.62, bg: 'rgba(200,30,30,0.95)', weight: 700 });
     l.position.set(0, 3.7, 0.3); f.mesh.add(l); f.mesh.userData.downTag = l;
   }
   function breakDown(f, why, pm) {

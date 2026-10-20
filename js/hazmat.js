@@ -93,7 +93,7 @@
       const bar = new T.Mesh(new T.BoxGeometry(len, 0.08, 0.08), lineMat);
       bar.position.set((ax + bx) / 2, 1.9, (az + bz) / 2); bar.rotation.y = -Math.atan2(bz - az, bx - ax); bar.renderOrder = 12;
       const ring = new T.Mesh(new T.RingGeometry(1.4, 1.75, 36), lineMat); ring.rotation.x = -Math.PI / 2; ring.position.set((ax + bx) / 2, 0.1, (az + bz) / 2); ring.renderOrder = 12;
-      const lab = W.makeLabel((B.tr || ((t) => t))('Too close: ' + v.d.toFixed(1) + ' m, needs ' + v.need + ' m'), { size: 0.7, bg: 'rgba(200,30,30,0.95)', weight: 700, depthTest: true });
+      const lab = W.makeLabel(('Too close: ' + v.d.toFixed(1) + ' m, needs ' + v.need + ' m'), { size: 0.7, bg: 'rgba(200,30,30,0.95)', weight: 700, depthTest: true });
       lab.position.set((ax + bx) / 2, 3, (az + bz) / 2);
       warn.add(bar, ring, lab);
     });
@@ -130,5 +130,5 @@
   document.head.appendChild(css);
   draw();
   B.tools.add({ id: 'hazmat', label: 'Hazmat', render });
-  B.hazmat = { violations, groups: () => groups, CLASS, fix, redraw: draw };
+  B.hazmat = { violations, groups: () => groups, CLASS, fix, redraw: draw, spills, cabinet, warn };
 })();
