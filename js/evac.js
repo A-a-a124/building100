@@ -15,6 +15,12 @@
     chg: { name: 'Battery fire at the forklift chargers', x: 8, z: -35, r: 16 },
   };
   let scenario = 'haz', drill = null, last = null;
+  // every finished drill is kept in this browser, to show whether evacuation is getting faster
+  const KEY = 'b100.drills', CAPTURE = /[?&]capture/.test(location.search);
+  let history = [];
+  try { history = CAPTURE ? [] : JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) {}
+  last = history[history.length - 1] || null;
+  const saveHistory = () => { try { if (!CAPTURE) localStorage.setItem(KEY, JSON.stringify(history.slice(-30))); } catch (e) {} };
 
   // ---------- permanent fire exits with green signs ----------
   const exitMat = W.mat('#1f8a4c', { roughness: 0.5 });
@@ -173,6 +179,7 @@
       drill.finished = true;
       const lastOut = drill.runners.slice().sort((p, q) => q.out - p.out)[0];
       last = { fire: drill.fire.name, t: Math.max(...drill.runners.map((q) => q.out)), all: Math.max(...drill.runners.map((q) => q.safe)), lastName: lastOut.a.anon ? 'a worker' : lastOut.a.name, people: drill.runners.map((q) => ({ name: q.a.anon ? 'Worker' : q.a.name, exit: q.exit.id, out: q.out, ap: q.ap.id })), date: new Date() };
+      last.scenario = scenario; history.push(last); saveHistory();
       S.addLog('Drill complete: building clear in ' + fmt(last.t, 0) + ' s', 'info');
       B.tools.toast('Building clear in ' + mmss(last.t) + '. Everyone at the assembly points.', 6000);
       setTimeout(() => end(), 1800);
@@ -192,10 +199,33 @@
       ${ex.map((q) => '<tr><td>' + P.esc(q.zone) + '</td><td class="code">' + q.exit + '</td><td class="num ' + (q.t > TARGET ? 'bad' : 'good') + '">' + mmss(q.t) + '</td></tr>').join('')}</tbody></table>
       <p>Closed by this fire: ${EXITS.filter((e) => Math.hypot(e.x - fire.x, e.z - fire.z) < fire.r).map((e) => e.id).join(', ') || 'none'}. Slowest area: <b>${P.esc(worst.zone)}</b>.</p>
       ${last ? `<h4>Last drill result</h4><div class="card"><b>Building clear in ${mmss(last.t)} ${last.t <= TARGET ? '· within target' : '· over the 3 minute target'}</b><p>${P.esc(last.fire)}. Everyone reached an assembly point after ${mmss(last.all)}. Last one out: ${P.esc(last.lastName)}.</p></div>
-        <table><thead><tr><th>Person</th><th>Exit</th><th class="num">Out after</th></tr></thead><tbody>${last.people.map((p) => '<tr><td>' + P.esc(p.name) + '</td><td class="code">' + p.exit + '</td><td class="num">' + mmss(p.out) + '</td></tr>').join('')}</tbody></table>` : ''}`;
+        <table><thead><tr><th>Person</th><th>Exit</th><th class="num">Out after</th></tr></thead><tbody>${last.people.map((p) => '<tr><td>' + P.esc(p.name) + '</td><td class="code">' + p.exit + '</td><td class="num">' + mmss(p.out) + '</td></tr>').join('')}</tbody></table>` : ''}
+      ${history.length ? `<h4>Drill history · ${history.length} drills</h4><p>${trend()}</p><canvas id="drHist" width="840" height="260"></canvas>
+        <table><thead><tr><th>Date</th><th>Scenario</th><th class="num">Building clear</th></tr></thead><tbody>${history.slice().reverse().slice(0, 10).map((h) => '<tr><td>' + new Date(h.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '</td><td>' + P.esc(h.fire) + '</td><td class="num ' + (h.t > TARGET ? 'bad' : 'good') + '">' + mmss(h.t) + '</td></tr>').join('')}</tbody></table>
+        <div class="btnrow"><button class="btn" id="drCsv">Export drill history (CSV)</button><button class="btn" id="drClear">Clear the history</button></div>` : ''}`;
+    if (history.length) {
+      histChart(el.querySelector('#drHist'));
+      el.querySelector('#drCsv').addEventListener('click', () => B.tools.download('building100-drills.csv', ['Date,Scenario,Building clear (s),All at assembly points (s),Last out'].concat(history.map((h) => [new Date(h.date).toISOString().slice(0, 16).replace('T', ' '), '"' + h.fire + '"', Math.round(h.t), Math.round(h.all), '"' + h.lastName + '"'].join(','))).join('\n')));
+      el.querySelector('#drClear').addEventListener('click', () => { history = []; last = null; saveHistory(); render(el); });
+    }
     el.querySelector('#drSc').addEventListener('change', (e) => { scenario = e.target.value; render(el); });
     el.querySelector('#drGo').addEventListener('click', () => { document.getElementById('drawerClose').click(); start(); });
   }
+  function trend() {
+    if (history.length < 2) return 'Run more drills to see whether the evacuation is getting faster.';
+    const a = history[0].t, b = history[history.length - 1].t, d = a - b;
+    return Math.abs(d) < 3 ? 'Evacuation time is steady at about ' + mmss(b) + '.' : d > 0 ? 'Evacuation is ' + Math.round(d) + ' s faster than in the first drill.' : 'Evacuation is ' + Math.round(-d) + ' s slower than in the first drill: check the routes to the exits.';
+  }
+  function histChart(c) {
+    const ctx = c.getContext('2d'), cs = getComputedStyle(document.documentElement);
+    const acc = cs.getPropertyValue('--accent-strong').trim(), muted = cs.getPropertyValue('--muted').trim(), bad = cs.getPropertyValue('--bad').trim();
+    const pts = history.slice(-12), max = Math.max(TARGET * 1.2, ...pts.map((h) => h.t)), bw = 740 / Math.max(pts.length, 4);
+    const Y = (v) => 220 - (v / max) * 190;
+    ctx.clearRect(0, 0, c.width, c.height); ctx.font = '600 17px "IBM Plex Sans", sans-serif';
+    ctx.strokeStyle = bad; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(60, Y(TARGET)); ctx.lineTo(810, Y(TARGET)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = bad; ctx.fillText(tr('3 min target'), 700, Y(TARGET) - 8);
+    pts.forEach((h, i) => { const x = 70 + i * bw, y = Y(h.t); ctx.fillStyle = h.t > TARGET ? bad : acc; ctx.fillRect(x, y, bw * 0.6, 220 - y); ctx.fillStyle = muted; ctx.fillText(Math.round(h.t) + ' s', x, y - 6); ctx.fillText('#' + (history.length - pts.length + i + 1), x, 244); });
+  }
   B.tools.add({ id: 'drill', label: 'Emergency', render });
-  B.evac = { start, end, last: () => last, expected: () => expected(FIRES[scenario]), active: () => !!drill };
+  B.evac = { start, end, last: () => last, history: () => history, expected: () => expected(FIRES[scenario]), active: () => !!drill };
 })();

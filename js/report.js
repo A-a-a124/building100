@@ -60,6 +60,7 @@
       <div><h2>Biggest frozen stock</h2><table><tbody>${frozen || '<tr><td>None</td></tr>'}</tbody></table></div></div>
     <div class="two"><div><h2>Open alerts</h2><ul>${al}</ul></div>
       <div><h2>Safety</h2><ul><li>${fmt(S.st.nearMiss)} near misses, ${fmt(S.st.yields)} times a forklift stopped or gave way.</li><li>Hazmat rule breaches: ${f.haz.length}.</li>
+      <li>Forklift breakdowns: ${B.maint ? B.maint.stats.breakdowns : 0}, ${fmt(B.maint ? B.maint.stats.downH : 0, 1)} forklift hours lost.</li>
       <li>${f.drill ? 'Last evacuation drill: building clear in ' + fmt(f.drill.t / 60, 1) + ' min (' + esc(f.drill.fire) + ').' : 'No evacuation drill this month.'}</li></ul></div></div>
     <p class="foot">Monthly flows are projected from ${fmt(f.hrs, 1)} simulated hours (two shifts, 26 working days). Stock values use the loaded prices, or sample prices when none were loaded.</p>`;
   }

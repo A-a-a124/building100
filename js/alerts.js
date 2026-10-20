@@ -29,6 +29,7 @@
     const hold = B.ZONE_ITEMS.filter((z) => z.zone === 'QC');
     out.push({ key: 'qc', level: 'info', text: hold.length + ' deliveries on hold in Quality Inspection', sub: hold.map((z) => z.name).join('; '), act: 'Show QC', go: () => B.ui.focusZone('QC') });
     if (B.cycle) { const c = B.cycle.today(); if (c && !c.done) out.push({ key: 'count', level: 'info', text: 'Cycle count due today: ' + c.total + ' locations', sub: c.drone + ' by drone D1, ' + c.team + ' by the team.', act: 'Count plan', go: () => B.tools.open('count') }); }
+    (B.alertSources || []).forEach((src) => out.push(...src()));
     const rank = { bad: 0, warn: 1, info: 2 };
     return out.sort((a, b) => rank[a.level] - rank[b.level]);
   }
