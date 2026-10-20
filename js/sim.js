@@ -29,7 +29,7 @@
     const m = Math.floor(t / 60) % 1440;
     return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
   };
-  S.addLog = (m, k) => log(m, k);
+  S.addLog = (m, k) => log(m, k); S.newInbound = (n) => newInbound(n); S.newOrder = (n) => newOrder(n);
   function log(msg, kind) {
     S.log.unshift({ t: S.clock(S.st.t), msg, kind: kind || 'info' });
     if (S.log.length > 30) S.log.pop();
@@ -190,17 +190,17 @@
     return tr;
   }
 
-  function newInbound() {
+  function newInbound(n) {
     const tr = spawnTruck('in');
-    if (!tr) return;
-    tr.count = 6 + Math.floor(R() * 7);
+    if (!tr) return null;
+    tr.count = n ? Math.min(12, n) : 6 + Math.floor(R() * 7);
     tr.done = 0;
     S.st.trucksIn++;
-    log('Inbound truck at door IN ' + tr.door.n + ' with ' + tr.count + ' pallets', 'in');
+    log('Inbound truck at door IN ' + tr.door.n + ' with ' + tr.count + ' pallets', 'in'); return tr;
   }
 
-  function newOrder() {
-    const lines = 2 + Math.floor(R() * 5);
+  function newOrder(n) {
+    const lines = n ? Math.min(6, n) : 2 + Math.floor(R() * 5);
     const order = { id: 'SO-' + orderSeq++, lines, picked: 0, created: S.st.t, door: null, pos: [] };
     S.pendingOrders.push(order);
     log('New issue order ' + order.id + ' (' + lines + ' pallets)', 'out');
@@ -424,8 +424,7 @@
     st.t += dt;
     const rate = S.RATES[st.rate];
     const shiftK = B.env ? B.env.rateFactor() : 1;
-    if (R() < (rate.trucks * shiftK / 3600) * dt) newInbound();
-    if (R() < (rate.orders * shiftK / 3600) * dt) newOrder();
+    if (S.replay) S.replay.tick(st.t); else { if (R() < (rate.trucks * shiftK / 3600) * dt) newInbound(); if (R() < (rate.orders * shiftK / 3600) * dt) newOrder(); }
     releaseOrders();
     S.orders.forEach((o) => {
       if (o.waitTruck) { const tr = spawnTruck('out', o.door); if (tr) { tr.order = o; tr.done = 0; o.waitTruck = false; } }

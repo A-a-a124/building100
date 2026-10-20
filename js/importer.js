@@ -10,6 +10,8 @@
     bin: ['storage bin', 'bin', 'location', 'lgpla', 'bin location', 'storage location bin'],
     last: ['last movement', 'last goods movement', 'last movement date', 'last issue', 'last gr date', 'date', 'days since movement', 'days'],
     group: ['category', 'material group', 'matkl', 'group'],
+    price: ['unit price', 'price', 'moving average price', 'map', 'standard price', 'unit cost', 'price (sar)', 'unit price (sar)'],
+    usage: ['monthly usage', 'usage per month', 'avg monthly usage', 'monthly consumption', 'consumption'],
   };
   const CAT_WORDS = [
     ['valve', /valve/i], ['flange', /flange|elbow|tee|reducer|fitting|coupling|nipple/i], ['gasket', /gasket|stud|bolt|nut|ring|washer/i],
@@ -75,6 +77,7 @@
     const recs = rows.slice(1).map((r) => ({
       mat: c.mat >= 0 ? String(r[c.mat]).trim() : '', desc: c.desc >= 0 ? String(r[c.desc]).trim() : '', qty: Number(String(r[c.qty]).replace(/,/g, '')) || 0,
       unit: c.unit >= 0 ? String(r[c.unit]).trim() || 'EA' : 'EA', bin: c.bin >= 0 ? String(r[c.bin]).trim() : '', days: c.last >= 0 ? toDays(r[c.last]) : 30, group: c.group >= 0 ? String(r[c.group]) : '',
+      price: c.price >= 0 ? Number(String(r[c.price]).replace(/[^\d.]/g, '')) || 0 : 0, usage: c.usage >= 0 ? Number(String(r[c.usage]).replace(/,/g, '')) || 0 : 0,
     })).filter((r) => (r.mat || r.desc) && r.qty > 0);
     // rebuild the item catalogue in place so every module keeps its references
     B.ITEMS.length = 0;
@@ -84,7 +87,7 @@
       const key = r.mat || r.desc;
       if (!byMat.has(key)) {
         const cat = guessCat(r.desc, r.group);
-        const it = { i: B.ITEMS.length, cat, name: r.desc || 'Material ' + r.mat, spec: r.group || '', unit: r.unit.toUpperCase(), per: r.qty, h: 0.6 + (B.ITEMS.length % 5) * 0.15, mat: r.mat || '-' };
+        const it = { i: B.ITEMS.length, cat, name: r.desc || 'Material ' + r.mat, spec: r.group || '', unit: r.unit.toUpperCase(), per: r.qty, h: 0.6 + (B.ITEMS.length % 5) * 0.15, mat: r.mat || '-', price: r.price || 0, usage: r.usage || 0 };
         B.ITEMS.push(it);
         (B.itemsByCat[cat] = B.itemsByCat[cat] || []).push(it.i);
         byMat.set(key, it);
@@ -126,10 +129,10 @@
     } catch (e) { B.tools.toast(e.message, 6000); }
   }
 
-  const TEMPLATE = 'Material,Description,Quantity,Unit,Storage Bin,Last Movement,Material Group\n' +
-    '1000123456,"GATE VALVE 6IN ANSI 300 CS",4,EA,C-07-1-1,2026-09-14,VALVES\n' +
-    '1000123457,"BEARING 6316-2Z/C3",20,EA,H-03-2-2,2026-03-02,MECH SPARES\n' +
-    '1000123458,"PRESSURE TRANSMITTER 0-100 BAR",12,EA,,2025-11-20,INSTRUMENTS\n';
+  const TEMPLATE = 'Material,Description,Quantity,Unit,Storage Bin,Last Movement,Material Group,Unit Price,Monthly Usage\n' +
+    '1000123456,"GATE VALVE 6IN ANSI 300 CS",4,EA,C-07-1-1,2026-09-14,VALVES,6200,1\n' +
+    '1000123457,"BEARING 6316-2Z/C3",20,EA,H-03-2-2,2026-03-02,MECH SPARES,640,6\n' +
+    '1000123458,"PRESSURE TRANSMITTER 0-100 BAR",12,EA,,2025-11-20,INSTRUMENTS,5400,2\n';
 
   function render(el) {
     const info = B.importInfo;
@@ -137,7 +140,7 @@
       <h4>Load your real stock</h4>
       <p>Export stock from SAP (for example MB52 or LX02) or your WMS as Excel or CSV. Bins that match the rack codes (like C-07-3-1) go to that exact slot. Everything else is placed in its category's rows.</p>
       <label class="drop" id="drop" tabindex="0">Drop an .xlsx or .csv file here, or click to choose<input type="file" id="file" accept=".csv,.xlsx,.xls" hidden></label>
-      <p>Recognised columns: Material, Description, Quantity, Unit, Storage Bin, Last Movement (date or days), Material Group. Your file stays in this browser and is never uploaded.</p>
+      <p>Recognised columns: Material, Description, Quantity, Unit, Storage Bin, Last Movement (date or days), Material Group, Unit Price (SAR) and Monthly Usage. Your file stays in this browser and is never uploaded.</p>
       <div class="btnrow"><button class="btn" id="tpl">Download template</button><button class="btn" id="restore">Restore sample data</button></div>
       ${info ? `<h4>Current data: ${B.panel.esc(info.label)}</h4><div class="row2">
         <div class="stat"><b>${B.tools.fmt(info.rows)}</b><small>stock lines read</small></div><div class="stat"><b>${B.tools.fmt(info.items)}</b><small>distinct materials</small></div>
@@ -160,5 +163,5 @@
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (saved && !/[?&]capture/.test(location.search)) apply(saved.rows, saved.label);
   } catch (e) {}
-  B.importer = { apply, parseCSV };
+  B.importer = { apply, parseCSV, readFile };
 })();

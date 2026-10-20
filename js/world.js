@@ -63,7 +63,7 @@
     sand.position.y = -0.05;
     sand.receiveShadow = true;
     scene.add(sand);
-    const asphalt = mat('#4b4f55', { roughness: 0.95 });
+    const asphalt = (W.asphalt = mat('#4b4f55', { roughness: 0.95 }));
     [[-45, BZ0 - 25, 44, 50], [6, BZ1 + 25, 66, 50], [(BX1 + 76) / 2, 0, 76 - BX1, BDp + 20], [96, BZ1 + 5, 44, 10]].forEach(([x, z, w, d]) => {
       const p = new T.Mesh(new T.PlaneGeometry(w, d), asphalt);
       p.rotation.x = -Math.PI / 2;
@@ -71,7 +71,7 @@
       p.receiveShadow = true;
       scene.add(p);
     });
-    const floor = new T.Mesh(new T.PlaneGeometry(BWd, BDp), mat('#b8bdc2', { roughness: 0.9 }));
+    const floor = (W.floor = new T.Mesh(new T.PlaneGeometry(BWd, BDp), mat('#b8bdc2', { roughness: 0.9 })));
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     scene.add(floor);
@@ -267,7 +267,7 @@
       }
     }
     g.add(tag(drums, { type: 'zone', id: 'HAZ' }));
-    const cyl = inst(new T.CylinderGeometry(0.12, 0.12, 1.5, 10), mat('#5d8a5e', { metalness: 0.4 }), 24);
+    const cyl = (W.cylinders = inst(new T.CylinderGeometry(0.12, 0.12, 1.5, 10), mat('#5d8a5e', { metalness: 0.4 }), 24));
     for (let k = 0; k < 24; k++) setInst(cyl, k, zn.x[0] + 4 + (k % 12) * 0.4, 0.75, zn.z[1] - 4 + Math.floor(k / 12) * 0.5, 1, 1, 1);
     g.add(tag(cyl, { type: 'zone', id: 'HAZ' }));
     const chain = box(5, 0.05, 0.05, '#333333');
