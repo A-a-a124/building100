@@ -329,7 +329,7 @@
   const TOUR = [
     ['overview', null, 'Building 100 from outside', 'A 138 x 80 m materials warehouse with an open storage yard beside it. Stock arrives through 4 doors on the north side and leaves through 4 on the south side.'],
     ['rcv', 'RCV', 'Receiving', 'Inbound trucks back onto the doors and their pallets are unloaded into the staging lane. A door light turns red while the door is occupied.'],
-    [null, 'QC', 'Quality inspection', 'Material is checked against the purchase order here. A green tag means accepted, red means on hold.'],
+    [null, 'QC', 'Quality inspection', 'Material is checked against the delivery documents here. A green tag means accepted, red means on hold.'],
     ['rack', 'RACK', 'Pallet racking', '14 rows, A to N, each with 24 bays on 5 levels. Forklifts handle the heavy pallets; colour shows the material category.'],
     ['aisle', null, 'Inside an aisle', 'The operator view down an aisle. Watch for Drone D1 counting pallets here. Click any pallet to see its contents.'],
     ['team', null, 'The team', 'Mansour and Mohsen carry the light cartons, Abdullah supervises with his tea, Nasser runs the stock system, and Ghazi stops by to chat with everyone.'],
@@ -338,7 +338,18 @@
     ['haz', 'HAZ', 'Hazardous materials cage', 'A fenced cage with a containment floor. Drums are colour-coded by hazard class.'],
     ['yard', 'YARD', 'Open storage yard', 'Line pipe, cable drums, steel and containers outside. Drone D2 surveys the yard from 16 m.'],
     ['dsp', 'DSP', 'Shipping and issue', 'Forklifts gather the pallets for each issue order in front of a door, then a truck loads them.'],
-    ['overview', null, 'Your turn', 'Search for a material or a person, or change the workload and forklift count at the bottom and watch the indicators respond.'],
+    // the operations tools, each opened in the Data & analysis panel
+    ['overview', null, 'Alerts and the daily task list', 'The bell collects what needs attention: full rows, critical spares below minimum, hazmat breaches, broken forklifts, trucks waiting. It also builds the supervisor’s task list for the day.', 'alerts'],
+    ['overview', null, 'What the stock is worth', 'Value in riyals, ABC and XYZ classes, frozen stock that has not moved for a year, and what each pallet costs to keep.', 'value'],
+    ['rack', null, 'Who owns what', 'The warehouse stores for Aramco and other companies. Each company has its own block of racking, its fill rate and its monthly storage charge.', 'owners'],
+    ['rcv', null, 'Carriers and the gate', 'Every truck has a transport company and a booked slot. See who came on time, who was late, and how long trucks waited at the gate.', 'carriers'],
+    ['aisle', null, 'Cycle counts with drones', 'A few locations are counted every working day instead of one big stock-take. Drone D1 counts the high levels, the team the low ones.', 'count'],
+    ['overview', null, 'Demand forecast', 'Each material’s issues are forecast 12 weeks ahead, and the minimum and maximum levels can follow the forecast.', 'demand'],
+    ['overview', null, 'Fleet and weather', 'Forklifts break down and go for maintenance; dust storms ground the yard drone and slow the trucks. See what each costs.', 'fleet'],
+    ['haz', null, 'Hazmat rules and fire drills', 'Incompatible materials stored too close are flagged with a one-click fix. The Emergency tab runs a fire drill and times the evacuation.', 'hazmat'],
+    ['overview', null, 'Shift handover', 'At every shift change a summary pops up for the incoming shift: what was done, what is still open, and the open alerts.', 'handover'],
+    ['overview', null, 'Return on investment and the monthly report', 'Each improvement is costed from the model with its payback time, and one click builds the PDF report for management.', 'roi'],
+    ['overview', null, 'Your turn', 'Search for a material, scan a label, click the site map to jump around, or change the workload and forklifts at the bottom and watch the numbers respond.'],
   ];
   let tourI = -1, tourT = 0;
   const DWELL = 9;
@@ -355,8 +366,10 @@
     if (zone) focusZone(zone, !view);
     else { selected = null; W.clearHighlight(); P.showWelcome(); }
     if (view) setView(view);
+    const tab = TOUR[tourI][4], drawer = document.querySelector('.drawer');
+    if (tab && B.tools) B.tools.open(tab); else if (drawer && !drawer.hidden) $('drawerClose').click();
   }
-  function stopTour() { if (tourI < 0) return; tourI = -1; $('tour').hidden = true; }
+  function stopTour() { if (tourI < 0) return; tourI = -1; $('tour').hidden = true; const d = document.querySelector('.drawer'); if (d && !d.hidden) $('drawerClose').click(); }
   $('tourBtn').addEventListener('click', () => { closeIntro(); showTour(0); });
   $('tourNext').addEventListener('click', () => (tourI === TOUR.length - 1 ? stopTour() : showTour(tourI + 1)));
   $('tourPrev').addEventListener('click', () => showTour(tourI - 1));

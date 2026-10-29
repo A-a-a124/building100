@@ -192,7 +192,7 @@
 
   function newInbound(n) {
     const tr = spawnTruck('in');
-    if (!tr) return null;
+    if (!tr) { if (!S.gateRetry) (S.gate = S.gate || []).push({ t: S.st.t, n }); return null; }
     tr.count = n ? Math.min(12, n) : 6 + Math.floor(R() * 7);
     tr.done = 0;
     S.st.trucksIn++;
@@ -425,6 +425,7 @@
     const rate = S.RATES[st.rate];
     const shiftK = B.env ? B.env.rateFactor() : 1;
     if (S.replay) S.replay.tick(st.t); else { if (R() < (rate.trucks * shiftK / 3600) * dt) newInbound(); if (R() < (rate.orders * shiftK / 3600) * dt) newOrder(); }
+    if (S.gate && S.gate.length && W.doorsIn.some((d) => !d.busy)) { const g = S.gate.shift(); S.gateRetry = true; const tr = newInbound(g.n); S.gateRetry = false; if (tr) tr.gateWait = S.st.t - g.t; else S.gate.unshift(g); }
     releaseOrders();
     S.orders.forEach((o) => {
       if (o.waitTruck) { const tr = spawnTruck('out', o.door); if (tr) { tr.order = o; tr.done = 0; o.waitTruck = false; } }

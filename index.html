@@ -143,6 +143,16 @@ button { cursor: pointer; }
   .brand p { display: none; }
   .how { grid-template-columns: 1fr; }
 }
+/* Phones: one scrolling row of views, no site map, weather chip at the bottom, controls that scroll sideways */
+@media (max-width: 760px) {
+  .ovl.views { flex-wrap: nowrap !important; overflow-x: auto; right: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .ovl.views .vbtn { flex: none; }
+  .mmap { display: none !important; }
+  .wxchip { top: auto !important; bottom: 10px; left: 10px; right: auto !important; font-size: 11px !important; padding: 4px 9px !important; }
+  .dock > * { flex: none; }
+  .drawer { width: 100% !important; }
+  .hocard { top: 52px !important; }
+}
 /* Cinematic capture mode: the 3D stage fills the window */
 body.cine .top, body.cine .panel, body.cine .dock, body.cine .ovl, body.cine #tip { display: none !important; }
 body.cine .main { grid-template-columns: 1fr; }
@@ -228,7 +238,7 @@ body.cine .main { grid-template-columns: 1fr; }
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg><b>Pan</b><span>Right mouse button, or two-finger drag</span></div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v10l2.5-2 2 4.5 2-1-2-4.5H17z"/></svg><b>Click anything</b><span>A pallet, zone, forklift, person or drone shows its details</span></div>
     </div>
-    <div class="row"><button class="btn primary" id="introTour">Start the 90-second tour</button><button class="btn" id="introClose">Explore on my own</button></div>
+    <div class="row"><button class="btn primary" id="introTour">Start the guided tour</button><button class="btn" id="introClose">Explore on my own</button></div>
   </div>
 </div>
 
@@ -262,6 +272,8 @@ body.cine .main { grid-template-columns: 1fr; }
 <script src="js/weather.js"></script>
 <script src="js/demand.js"></script>
 <script src="js/roi.js"></script>
+<script src="js/owners.js"></script>
+<script src="js/carriers.js"></script>
 <script src="js/realism.js"></script>
 <script src="js/wow.js"></script>
 <script src="js/perf.js"></script>

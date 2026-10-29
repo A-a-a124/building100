@@ -72,7 +72,7 @@
       tick(t) {
         for (const e of ev) {
           if (e.done || e.t > t) continue;
-          if (e.kind === 'in') { if (!S.newInbound(e.n)) continue; } else S.newOrder(e.n);
+          if (e.kind === 'in') { S.gateRetry = true; const ok = S.newInbound(e.n); S.gateRetry = false; if (!ok) continue; } else S.newOrder(e.n);
           e.done = true; this.fired++;
         }
         if (this.fired === this.total && !S.tasks.length && !S.pendingOrders.length && !S.trucks.length) finish();

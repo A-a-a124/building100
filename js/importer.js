@@ -10,6 +10,7 @@
     bin: ['storage bin', 'bin', 'location', 'lgpla', 'bin location', 'storage location bin'],
     last: ['last movement', 'last goods movement', 'last movement date', 'last issue', 'last gr date', 'date', 'days since movement', 'days'],
     group: ['category', 'material group', 'matkl', 'group'],
+    owner: ['owner', 'company', 'customer', 'stock owner', 'client'],
     price: ['unit price', 'price', 'moving average price', 'map', 'standard price', 'unit cost', 'price (sar)', 'unit price (sar)'],
     usage: ['monthly usage', 'usage per month', 'avg monthly usage', 'monthly consumption', 'consumption'],
   };
@@ -77,7 +78,7 @@
     const recs = rows.slice(1).map((r) => ({
       mat: c.mat >= 0 ? String(r[c.mat]).trim() : '', desc: c.desc >= 0 ? String(r[c.desc]).trim() : '', qty: Number(String(r[c.qty]).replace(/,/g, '')) || 0,
       unit: c.unit >= 0 ? String(r[c.unit]).trim() || 'EA' : 'EA', bin: c.bin >= 0 ? String(r[c.bin]).trim() : '', days: c.last >= 0 ? toDays(r[c.last]) : 30, group: c.group >= 0 ? String(r[c.group]) : '',
-      price: c.price >= 0 ? Number(String(r[c.price]).replace(/[^\d.]/g, '')) || 0 : 0, usage: c.usage >= 0 ? Number(String(r[c.usage]).replace(/,/g, '')) || 0 : 0,
+      price: c.price >= 0 ? Number(String(r[c.price]).replace(/[^\d.]/g, '')) || 0 : 0, usage: c.usage >= 0 ? Number(String(r[c.usage]).replace(/,/g, '')) || 0 : 0, owner: c.owner >= 0 ? String(r[c.owner]).trim() : '',
     })).filter((r) => (r.mat || r.desc) && r.qty > 0);
     // rebuild the item catalogue in place so every module keeps its references
     B.ITEMS.length = 0;
@@ -94,7 +95,7 @@
       }
       r.item = byMat.get(key);
     });
-    B.SLOTS.forEach((s) => { s.item = -1; s.qty = 0; s.days = 0; s.reserved = false; });
+    B.SLOTS.forEach((s) => { s.item = -1; s.qty = 0; s.days = 0; s.reserved = false; s.owner = undefined; });
     const byCode = new Map(B.SLOTS.map((s) => [s.code, s]));
     let exact = 0, auto = 0, unplaced = 0;
     const later = [];
@@ -116,7 +117,7 @@
     if (B.slotting) B.slotting.clear();
     return B.importInfo;
   }
-  function place(s, r) { s.item = r.item.i; s.qty = r.qty; s.days = r.days; }
+  function place(s, r) { s.item = r.item.i; s.qty = r.qty; s.days = r.days; s.owner = r.owner || undefined; }
 
   async function handle(file) {
     try {
@@ -140,7 +141,7 @@
       <h4>Load your real stock</h4>
       <p>Export stock from SAP (for example MB52 or LX02) or your WMS as Excel or CSV. Bins that match the rack codes (like C-07-3-1) go to that exact slot. Everything else is placed in its category's rows.</p>
       <label class="drop" id="drop" tabindex="0">Drop an .xlsx or .csv file here, or click to choose<input type="file" id="file" accept=".csv,.xlsx,.xls" hidden></label>
-      <p>Recognised columns: Material, Description, Quantity, Unit, Storage Bin, Last Movement (date or days), Material Group, Unit Price (SAR) and Monthly Usage. Your file stays in this browser and is never uploaded.</p>
+      <p>Recognised columns: Material, Description, Quantity, Unit, Storage Bin, Last Movement (date or days), Material Group, Unit Price (SAR), Monthly Usage and Owner (the company the stock belongs to). Your file stays in this browser and is never uploaded.</p>
       <div class="btnrow"><button class="btn" id="tpl">Download template</button><button class="btn" id="restore">Restore sample data</button></div>
       ${info ? `<h4>Current data: ${B.panel.esc(info.label)}</h4><div class="row2">
         <div class="stat"><b>${B.tools.fmt(info.rows)}</b><small>stock lines read</small></div><div class="stat"><b>${B.tools.fmt(info.items)}</b><small>distinct materials</small></div>

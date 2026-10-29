@@ -78,7 +78,9 @@
   B.perf = { merged: { before, after } };
 
   // ---------- adaptive resolution: step down when frames are slow, back up when there is headroom ----------
-  const dpr = Math.min(devicePixelRatio || 1, 2);
+  // phones have very dense screens: 1.5 looks sharp and keeps the frame rate up
+  const phone = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) < 820;
+  const dpr = Math.min(devicePixelRatio || 1, phone ? 1.5 : 2);
   // last step keeps full resolution but turns shadows off, which costs the GPU the most
   const LEVELS = [dpr, Math.min(dpr, 1.5), Math.min(dpr, 1.25), 1].filter((q, i, a) => i === 0 || q < a[i - 1]);
   const MAX = LEVELS.length;

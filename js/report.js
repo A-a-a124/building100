@@ -18,7 +18,7 @@
   function recommendations(f) {
     const out = [], st = f.st, cap = B.SLOTS.length;
     if (st.frozenPallets) out.push(['Clear frozen stock', 'Review the ' + fmt(st.frozenPallets) + ' pallets that have not moved for a year (' + B.stock.sar(st.frozen) + ', costing ' + B.stock.sar(st.holdFrozen) + ' a year to keep). Disposing of or returning half of them frees ' + fmt(st.frozenPallets / 2) + ' pallet positions (' + fmt((st.frozenPallets / 2 / cap) * 100, 1) + '% of the racking).']);
-    if (st.below.length) out.push(['Reorder below-minimum stock', 'Raise purchase requests for ' + st.below.length + ' materials below minimum, ' + st.belowCritical.length + ' of them critical spares. Estimated value ' + B.stock.sar(f.reorder) + '.']);
+    if (st.below.length) out.push(['Report below-minimum stock to the planner', 'Send the materials planner the list of ' + st.below.length + ' materials below minimum, ' + st.belowCritical.length + ' of them critical spares (about ' + B.stock.sar(f.reorder) + ' to bring them back to maximum).']);
     if (f.cut > 3) out.push(['Re-slot fast movers', 'Moving the most-picked materials next to the shipping doors cuts the average pick trip from ' + fmt(f.plan.before, 0) + ' m to ' + fmt(f.plan.after, 0) + ' m (' + fmt(f.cut, 0) + '% less driving).']);
     if (f.haz.length) out.push(['Fix hazmat segregation', f.haz.length + ' storage rule breaches in the cage, for example ' + f.haz[0].a.name + ' only ' + f.haz[0].d.toFixed(1) + ' m from ' + f.haz[0].b.name + ' (needs ' + f.haz[0].need + ' m).']);
     if (S.st.nearMiss) out.push(['Keep people and forklifts apart', fmt(S.st.nearMiss) + ' near misses were recorded. Mark pedestrian walkways in the busiest areas and keep "forklifts stop for people" switched on.']);

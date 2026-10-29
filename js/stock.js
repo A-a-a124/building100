@@ -111,7 +111,7 @@
     if (s.item < 0) return;
     const r = compute().rows[s.item];
     if (!r) return;
-    const st = r.below ? '<span class="pill warn"><i></i>Below minimum: reorder</span>' : r.over ? '<span class="pill"><i></i>Overstocked</span>' : '<span class="pill"><i style="color:var(--ok)"></i>Within min / max</span>';
+    const st = r.below ? '<span class="pill warn"><i></i>Below minimum: tell the planner</span>' : r.over ? '<span class="pill"><i></i>Overstocked</span>' : '<span class="pill"><i style="color:var(--ok)"></i>Within min / max</span>';
     document.getElementById('details').insertAdjacentHTML('beforeend', `<div class="card stockcard"><div class="kicker">Value and stock level</div>
       <div class="chips"><span class="pill"><i style="color:${ABC_COL[r.abc]}"></i>Class ${r.abc}${r.xyz}</span>${st}${r.critical ? '<span class="pill warn"><i></i>Critical spare</span>' : ''}</div>
       <dl class="kv"><dt>This pallet</dt><dd>${sar(s.qty * r.price)}</dd><dt>Unit price</dt><dd>${sar(r.price)}</dd>
@@ -136,7 +136,7 @@
       <h4>ABC / XYZ classes</h4><p><b>A B C</b> ranks materials by yearly consumption value (A = top 80%). <b>X Y Z</b> shows how steady demand is (X = steady, Z = irregular).</p>
       <table class="abc"><thead><tr><th></th><th class="num">X steady</th><th class="num">Y variable</th><th class="num">Z irregular</th></tr></thead><tbody>
       ${['A', 'B', 'C'].map((a) => '<tr><th><i class="dot" style="background:' + ABC_COL[a] + '"></i>' + a + '</th>' + ['X', 'Y', 'Z'].map((x) => { const q = cell(a, x); return '<td class="num">' + q.n + ' items<br><small>' + sar(q.v) + '</small></td>'; }).join('') + '</tr>').join('')}</tbody></table>
-      <p><b>AZ</b> items are costly and unpredictable: keep them as insurance spares and review each one. <b>CX</b> items can move to automatic reordering.</p>
+      <p><b>AZ</b> items are costly and unpredictable: keep them as insurance spares and review each one. <b>CX</b> items are steady and easy for the planner to replenish on a fixed rhythm.</p>
       <h4>Where is the money sitting still?</h4><p>Each dot is a material: further right means longer without movement, higher means more value.</p>
       <canvas id="stScatter" width="840" height="380"></canvas>
       <h4>Biggest frozen stock</h4><table><thead><tr><th>Material</th><th class="num">Frozen value</th><th class="num">Oldest</th></tr></thead><tbody>
