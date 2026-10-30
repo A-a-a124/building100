@@ -349,6 +349,10 @@
     ['haz', null, 'Hazmat rules and fire drills', 'Incompatible materials stored too close are flagged with a one-click fix. The Emergency tab runs a fire drill and times the evacuation.', 'hazmat'],
     ['overview', null, 'Shift handover', 'At every shift change a summary pops up for the incoming shift: what was done, what is still open, and the open alerts.', 'handover'],
     ['overview', null, 'Return on investment and the monthly report', 'Each improvement is costed from the model with its payback time, and one click builds the PDF report for management.', 'roi'],
+    ['overview', null, 'What if?', 'Close a dock door or a rack row, try a peak day or one forklift fewer, and watch the numbers change live.', 'whatif'],
+    ['overview', null, 'Before and after', 'Today against the warehouse with the improvements in place, on one printable page. The Present button in the header runs a three-minute show for management.', 'beforeafter'],
+    ['rack', null, 'Look inside and take a picture', 'Rack cutaway slices the racks at any row; Photo mode hides the interface and saves a picture; Copy view link shares this exact view.'],
+    ['overview', null, 'Drive and train', 'Drive a forklift with the keyboard, or start Training: six timed challenges that teach a new team member the warehouse.', 'training'],
     ['overview', null, 'Your turn', 'Search for a material, scan a label, click the site map to jump around, or change the workload and forklifts at the bottom and watch the numbers respond.'],
   ];
   let tourI = -1, tourT = 0;

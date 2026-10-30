@@ -9,7 +9,7 @@
     ['Stock', ['data', 'value', 'owners', 'demand', 'count', 'slotting', 'log', 'move']],
     ['Operations', ['alerts', 'carriers', 'order', 'fleet', 'weather', 'handover', 'whatif', 'crossdock', 'returns', 'replay', 'compare', 'forecast']],
     ['Safety', ['safety', 'hazmat', 'drill', 'errors', 'training']],
-    ['Reports', ['report', 'beforeafter', 'roi', 'targets']],
+    ['Reports', ['report', 'beforeafter', 'roi', 'targets', 'about']],
   ];
   const groupOf = (id) => (GROUPS.find(([, ids]) => ids.includes(id)) || GROUPS[1])[0];
 

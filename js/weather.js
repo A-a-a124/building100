@@ -31,7 +31,9 @@
   d2.update = (d, dt) => {
     if (w.wind <= 35) { if (d.grounded) { d.grounded = false; d.plan = []; } return fly(d, dt); }
     if (!d.grounded) { d.grounded = true; d.plan = [{ x: d.padX, y: d.padY + 6, z: d.padZ, sp: 4, label: 'Returning: wind too strong' }, { x: d.padX, y: d.padY, z: d.padZ, sp: 1.5, label: 'Landing' }, { wait: 1e9, label: 'Grounded: dust storm' }]; }
-    return fly(d, dt);
+    const r = fly(d, dt);
+    if (d.plan[0] && d.plan[0].label) d.status = d.plan[0].label;
+    return r;
   };
 
   // ---------- dust in the air ----------
