@@ -34,7 +34,7 @@
       record({ action: 'Put away', code: s.code, mat: it.mat, name: it.name, qty: s.qty, by: 'Forklift ' + f.n, ref: 'Receiving door IN ' + f.task.from.door.n });
     } else if (f && s.item < 0 && was >= 0) {
       const it = itemName(was);
-      record({ action: 'Picked for issue', code: s.code, mat: it ? it.mat : '', name: it ? it.name : '', qty: wasQty, by: 'Forklift ' + f.n, ref: f.task.order ? f.task.order.id : '' });
+      B.audit.record({ action: 'Picked for issue', code: s.code, mat: it ? it.mat : '', name: it ? it.name : '', qty: wasQty, by: 'Forklift ' + f.n, ref: f.task.order ? f.task.order.id : '' });
     } else pending.push({ s, was, wasQty });
   };
   // changes without a forklift come from the planner, an import or a count: group them per frame

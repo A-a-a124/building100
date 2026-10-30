@@ -29,6 +29,7 @@
     const m = Math.floor(t / 60) % 1440;
     return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
   };
+  S.go = (f, target, phase) => go(f, target, phase); S.goHome = (f) => go(f, f.home, 'home');
   S.addLog = (m, k) => log(m, k); S.newInbound = (n) => newInbound(n); S.newOrder = (n) => newOrder(n);
   function log(msg, kind) {
     S.log.unshift({ t: S.clock(S.st.t), msg, kind: kind || 'info' });
@@ -37,56 +38,12 @@
   }
 
   // ---------- Forklifts ----------
-  function makeForklift(n) {
-    const g = new T.Group();
-    const body = W.box(1.15, 0.9, 1.9, '#f2b31b', { roughness: 0.5 });
-    body.position.set(0, 0.7, 0.25);
-    const cw = W.box(1.15, 0.7, 0.45, '#2f3439');
-    cw.position.set(0, 0.85, 1.15);
-    const seat = W.box(0.6, 0.35, 0.5, '#2f3439');
-    seat.position.set(0, 1.3, 0.55);
-    g.add(body, cw, seat);
-    [[-0.5, -0.45], [0.5, -0.45], [-0.5, 1.05], [0.5, 1.05]].forEach(([x, z]) => {
-      const p = W.box(0.06, 1.2, 0.06, '#2f3439');
-      p.position.set(x * 0.95, 1.75, z);
-      g.add(p);
-    });
-    const roof = W.box(1.1, 0.06, 1.6, '#2f3439');
-    roof.position.set(0, 2.35, 0.3);
-    g.add(roof);
-    const wheelGeo = new T.CylinderGeometry(0.3, 0.3, 0.25, 14);
-    [[-0.55, -0.35], [0.55, -0.35], [-0.55, 0.95], [0.55, 0.95]].forEach(([x, z]) => {
-      const w = new T.Mesh(wheelGeo, W.mat('#1c1f22'));
-      w.rotation.z = Math.PI / 2;
-      w.position.set(x, 0.3, z);
-      g.add(w);
-    });
-    const mast = W.box(0.9, 2.3, 0.1, '#3d434a', { metalness: 0.4 });
-    mast.position.set(0, 1.25, -0.75);
-    const inner = W.box(0.7, 1, 0.08, '#555d66', { metalness: 0.4 });
-    inner.position.set(0, 1.25, -0.82);
-    const car = new T.Group();
-    const plate = W.box(0.95, 0.5, 0.06, '#2f3439');
-    plate.position.set(0, 0.25, 0);
-    const f1 = W.box(0.12, 0.05, 1.1, '#2f3439');
-    f1.position.set(-0.28, 0.03, -0.55);
-    const f2 = f1.clone();
-    f2.position.x = 0.28;
-    car.add(plate, f1, f2);
-    car.position.set(0, 0.12, -0.88);
-    g.add(mast, inner, car);
-    const num = W.makeLabel(String(n), { size: 0.7, bg: '#1a1300', fg: '#f2b31b', weight: 700, depthTest: true });
-    num.position.set(0, 2.9, 0.3);
-    g.add(num);
-    g.userData = { car, inner };
-    return g;
-  }
 
   function addForklift() {
     const n = S.forklifts.length + 1;
     const chg = B.zoneById('CHG');
     const home = { x: chg.x[0] + 1 + ((n - 1) % 6) * 2.2, z: chg.z[0] + 2.8, lz: L.front, face: { x: chg.x[0] + 1 + ((n - 1) % 6) * 2.2, z: chg.z[0] } };
-    const mesh = makeForklift(n);
+    const mesh = W.makeForklift(n);
     mesh.position.set(home.x, 0, home.z);
     const f = { n, mesh, x: home.x, z: home.z, head: 0, path: [], task: null, phase: 'idle', carY: 0.12, load: null, home, busyT: 0, totT: 0, lift: null, at: null };
     mesh.traverse((o) => (o.userData.pick = { type: 'forklift', n }));
@@ -217,7 +174,7 @@
       o.pos = W.stageOut.filter((p) => p.door === door).slice(0, o.lines);
       o.pos.forEach((p) => {
         const free = cand.filter((s) => !s.reserved);
-        const s = free[Math.floor(R() * free.length)];
+        const s = o.want && o.want.length ? o.want.shift() : free[Math.floor(R() * free.length)];
         s.reserved = true;
         S.tasks.push({ type: 'pick', from: s, to: p, order: o, created: S.st.t });
       });
@@ -286,7 +243,7 @@
     if (f.phase !== 'idle') f.busyT += dt;
     const t = f.task;
     if (f.phase === 'home') {
-      if (moveAlong(f, dt)) { f.at = f.home; f.phase = 'idle'; f.head = Math.PI * 0 + Math.atan2(0, 1); }
+      if (moveAlong(f, dt)) { f.at = f.home; f.phase = f.needCharge ? 'charging' : 'idle'; f.head = Math.PI * 0 + Math.atan2(0, 1); }
     } else if (f.phase === 'toPick') {
       if (moveAlong(f, dt)) {
         f.at = f.dest;
@@ -308,14 +265,20 @@
         });
       }
     } else if (f.phase === 'pick') {
-      if (updateLift(f, dt)) go(f, t.type === 'put' ? slotPoint(t.to) : outPoint(t.to), 'toDrop');
+      if (updateLift(f, dt)) go(f, t.type === 'put' && !t.cross ? slotPoint(t.to) : outPoint(t.to), 'toDrop');
     } else if (f.phase === 'toDrop') {
       if (moveAlong(f, dt)) {
         f.at = f.dest;
         f.phase = 'drop';
         startLift(f, f.dest.y, () => {
           detach(f);
-          if (t.type === 'put') {
+          if (t.cross) {
+            // cross-dock: the inbound pallet goes straight to an outbound lane
+            const p = W.makePallet(t.item);
+            p.position.set(t.to.x, 0, t.to.z); W.scene.add(p); t.to.used = p;
+            S.st.received++; S.st.crossDocked = (S.st.crossDocked || 0) + 1;
+            if (S.onCrossDock) S.onCrossDock(t);
+          } else if (t.type === 'put') {
             const s = t.to;
             s.item = t.item;
             s.qty = t.qty;

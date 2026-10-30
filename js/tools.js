@@ -4,13 +4,25 @@
   const $ = (id) => document.getElementById(id);
   const tabs = [];
   let current = null;
+  // tools are grouped in four sections; a tab not listed here falls under Operations
+  const GROUPS = [
+    ['Stock', ['data', 'value', 'owners', 'demand', 'count', 'slotting', 'log', 'move']],
+    ['Operations', ['alerts', 'carriers', 'order', 'fleet', 'weather', 'handover', 'whatif', 'crossdock', 'returns', 'replay', 'compare', 'forecast']],
+    ['Safety', ['safety', 'hazmat', 'drill', 'errors', 'training']],
+    ['Reports', ['report', 'beforeafter', 'roi', 'targets']],
+  ];
+  const groupOf = (id) => (GROUPS.find(([, ids]) => ids.includes(id)) || GROUPS[1])[0];
 
   const css = document.createElement('style');
   css.textContent = `
   .drawer { position: absolute; z-index: 5; top: 0; right: 0; bottom: 0; width: min(460px, 100%); background: var(--surface); border-left: 1px solid var(--line);
-    box-shadow: var(--shadow); display: grid; grid-template-rows: auto auto 1fr; min-height: 0; }
+    box-shadow: var(--shadow); display: grid; grid-template-rows: auto auto 1fr; grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .drawer > * { min-width: 0; }
   .drawer header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
   .drawer header h3 { margin: 0; font: 700 16px var(--f-display); }
+  .dgroups { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 8px 12px 0; }
+  .dgroups button { border: 1px solid var(--line); background: var(--surface-2); padding: 7px 6px; border-radius: 8px; font-weight: 700; font-size: 13px; color: var(--ink); }
+  .dgroups button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
   .dtabs { display: flex; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--line); overflow-x: auto; }
   .dtabs button { border: 1px solid transparent; background: transparent; padding: 6px 10px; border-radius: 8px; font-weight: 600; font-size: 13px; color: var(--muted); white-space: nowrap; }
   .dtabs button[aria-selected="true"] { background: var(--accent-strong); color: var(--accent-ink); }
@@ -41,7 +53,7 @@
   const drawer = document.createElement('aside');
   drawer.className = 'drawer';
   drawer.hidden = true;
-  drawer.innerHTML = '<header><h3>Data &amp; analysis</h3><button class="chip" id="drawerClose">Close</button></header><nav class="dtabs" id="dtabs"></nav><div class="dbody" id="dbody"></div>';
+  drawer.innerHTML = '<header><h3>Data &amp; analysis</h3><button class="chip" id="drawerClose">Close</button></header><div><nav class="dgroups" id="dgroups"></nav><nav class="dtabs" id="dtabs"></nav></div><div class="dbody" id="dbody"></div>';
   $('stage').appendChild(drawer);
   $('drawerClose').addEventListener('click', () => (drawer.hidden = true));
 
@@ -53,8 +65,11 @@
   btn.addEventListener('click', () => (drawer.hidden ? open(current || tabs[0].id) : (drawer.hidden = true)));
 
   function renderTabs() {
-    $('dtabs').innerHTML = tabs.map((t) => '<button data-tab="' + t.id + '" aria-selected="' + (t.id === current) + '">' + t.label + '</button>').join('');
+    const g = groupOf(current);
+    $('dgroups').innerHTML = GROUPS.map(([name]) => '<button data-group="' + name + '" aria-selected="' + (name === g) + '">' + name + '</button>').join('');
+    $('dtabs').innerHTML = tabs.filter((t) => groupOf(t.id) === g).map((t) => '<button data-tab="' + t.id + '" aria-selected="' + (t.id === current) + '">' + t.label + '</button>').join('');
   }
+  $('dgroups').addEventListener('click', (e) => { const b = e.target.closest('[data-group]'); if (!b) return; const first = tabs.find((t) => groupOf(t.id) === b.dataset.group); if (first) open(first.id); });
   $('dtabs').addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b) open(b.dataset.tab); });
   function open(id) {
     current = id;

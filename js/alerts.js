@@ -13,7 +13,7 @@
     const out = [], st = B.stock.compute();
     // rows close to full
     B.RACK.rows.forEach((row, ri) => {
-      const slots = B.SLOTS.filter((s) => s.row === ri), occ = slots.filter((s) => s.item >= 0 || s.reserved).length / slots.length;
+      const slots = B.SLOTS.filter((s) => s.row === ri), occ = slots.filter((s) => s.item >= 0 || (s.reserved && !s.blocked)).length / slots.length;
       if (occ >= 0.95) out.push({ key: 'row' + row.letter, level: occ >= 0.98 ? 'bad' : 'warn', text: 'Row ' + row.letter + ' is ' + fmt(occ * 100, 0) + '% full', sub: 'New pallets of this category will be placed in other rows, with longer trips.', act: 'Show row', go: () => B.ui.focusSlot(slots.find((s) => s.item < 0) || slots[0]) });
     });
     const occ = B.occupiedCount() / B.SLOTS.length;

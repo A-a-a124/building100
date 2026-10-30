@@ -84,7 +84,7 @@
   // last step keeps full resolution but turns shadows off, which costs the GPU the most
   const LEVELS = [dpr, Math.min(dpr, 1.5), Math.min(dpr, 1.25), 1].filter((q, i, a) => i === 0 || q < a[i - 1]);
   const MAX = LEVELS.length;
-  let level = 0, frames = 0, acc = 0, cooldown = 3, goodFor = 0, shadows = true;
+  let level = 0, frames = 0, acc = 0, cooldown = 3, goodFor = 0, shadows = true, full = false;
   const lowBox = () => document.getElementById('lyLow');
   function apply() {
     renderer.setPixelRatio(LEVELS[Math.min(level, MAX - 1)]);
@@ -100,7 +100,7 @@
   // the manual low-quality switch takes over; switching it off starts again from full quality
   if (lowBox()) lowBox().addEventListener('change', (e) => { if (!e.target.checked) { level = 0; shadows = true; cooldown = 3; } });
   B.hooks.frame.push((dt) => {
-    if (CAPTURE || document.hidden || (lowBox() && lowBox().checked)) return;
+    if (CAPTURE || document.hidden || full || (lowBox() && lowBox().checked)) return;
     frames++; acc += dt;
     if (acc < 1.5) return;
     const fps = frames / acc; frames = 0; acc = 0;
@@ -114,4 +114,6 @@
     else goodFor = 0;
     B.perf.fps = Math.round(fps); B.perf.level = level;
   });
+  // "Full quality" keeps the top level: highest resolution and shadows, never reduced
+  B.perf.setFull = (on) => { full = on; if (on) { level = 0; apply(); } cooldown = 3; };
 })();
