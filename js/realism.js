@@ -9,7 +9,7 @@
 
   // ---------- renderer ----------
   renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.98;
+  renderer.toneMappingExposure = 0.92;
   sun.shadow.normalBias = 0.02;
   // the sun moves slowly: redraw the shadow map every few frames instead of every frame
   renderer.shadowMap.autoUpdate = false;
@@ -57,7 +57,7 @@
   W.floor.material = new T.MeshStandardMaterial({ map: floorMap, roughnessMap: floorRough, roughness: 0.62, metalness: 0.0, color: '#ffffff' });
 
   const sandMap = srgb(canvas(512, 512, (g, w, h) => {
-    g.fillStyle = '#f2ece0'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#ded2b8'; g.fillRect(0, 0, w, h);
     for (let y = 0; y < h; y += 5 + R() * 7) { g.strokeStyle = 'rgba(150,120,80,' + (0.02 + R() * 0.03) + ')'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, y); for (let x = 0; x <= w; x += 16) g.lineTo(x, y + Math.sin((x / w) * Math.PI * 4 + y * 0.3) * 2.5); g.stroke(); }
     noise(g, w, h, 7000, 150, 255, 1.4);
   }));
@@ -113,7 +113,7 @@
     skyMat.uniforms.hor.value.copy(bg).lerp(new T.Color('#f4e9d6'), lum > 1.2 ? 0.25 : 0.05);
     skyMat.uniforms.sunDir.value.copy(sun.position).normalize();
     skyMat.uniforms.sunK.value = Math.max(0, Math.min(1, (hemi.intensity / baseHemi - 0.3) / 0.7));
-    skyMat.uniforms.top.value.copy(bg).lerp(new T.Color(lum > 1.2 ? '#4a85cc' : '#0a1426'), 0.7);
+    skyMat.uniforms.top.value.copy(bg).lerp(new T.Color(lum > 1.2 ? '#2f6fc4' : '#0a1426'), 0.8);
   }
 
   // ---------- rack bracing, column guards and end barriers ----------
@@ -198,10 +198,10 @@
     S.forklifts.forEach((f) => {
       if (f.mesh.userData.op) return;
       const g = new T.Group();
-      const torso = new T.Mesh(new T.BoxGeometry(0.42, 0.55, 0.26), vest); torso.position.y = 1.78;
+      const torso = new T.Mesh(new T.CylinderGeometry(0.21, 0.18, 0.55, 14), vest); torso.scale.z = 0.62; torso.position.y = 1.78;
       const head = new T.Mesh(new T.SphereGeometry(0.12, 14, 10), skin); head.position.y = 2.17;
       const hat = new T.Mesh(new T.SphereGeometry(0.135, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), helmet); hat.position.y = 2.2;
-      [-1, 1].forEach((s) => { const arm = new T.Mesh(new T.BoxGeometry(0.1, 0.42, 0.1), vest); arm.position.set(s * 0.26, 1.72, -0.12); arm.rotation.x = 0.9; g.add(arm); });
+      [-1, 1].forEach((s) => { const arm = new T.Mesh(new T.CylinderGeometry(0.05, 0.045, 0.42, 8), vest); arm.position.set(s * 0.26, 1.72, -0.12); arm.rotation.x = 0.9; g.add(arm); });
       g.add(torso, head, hat); g.position.z = 0.5;
       g.traverse((o) => (o.castShadow = true));
       f.mesh.add(g); f.mesh.userData.op = g;
@@ -230,8 +230,24 @@
     t = 0;
     crew(); sweep(); paintSky();
     const k = Math.max(0.12, Math.min(1, hemi.intensity / baseHemi));
-    if (Math.abs(k - lastK) > 0.02) { lastK = k; std.forEach((m) => (m.envMapIntensity = 0.42 * k)); }
+    if (Math.abs(k - lastK) > 0.02) { lastK = k; std.forEach((m) => (m.envMapIntensity = 0.55 * k)); }
   });
   crew(); sweep(); paintSky();
+
+  // ---------- daylight with more contrast: stronger sun, softer fill, warmer sun colour, deeper shadows ----------
+  const warm = new T.Color('#ffe9c4'), noon = new T.Color('#fff8ec');
+  hemi.groundColor.set('#8a7350');
+  B.hooks.frame.push(() => {
+    const k = Math.max(0, Math.min(1, (hemi.intensity - 0.2) / 0.52)); // 0 at night, 1 at full day (set by the environment module)
+    sun.intensity *= 1 + 0.25 * k;
+    hemi.intensity *= 1 - 0.22 * k;
+    if (scene.fog && !(B.weather && B.weather.state.dust)) { scene.fog.near = 340; scene.fog.far = 980; }
+    const h = ((B.sim.st.t / 3600) % 24 + 24) % 24, low = Math.min(1, Math.abs(h - 12.5) / 6);
+    sun.color.copy(noon).lerp(warm, low);
+  });
+  // soft vignette that frames the scene like a camera lens
+  const vig = document.createElement('div');
+  vig.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 58%, rgba(0,0,0,0.16) 100%)';
+  B.three.stage.appendChild(vig);
   B.realism = { sweep };
 })();

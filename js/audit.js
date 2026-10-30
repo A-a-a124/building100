@@ -28,11 +28,11 @@
     const was = prev[s.i], wasQty = prevQty[s.i];
     if (was === s.item && wasQty === s.qty) return;
     prev[s.i] = s.item; prevQty[s.i] = s.qty;
-    const f = S.forklifts.find((q) => q.task && (q.task.to === s || q.task.from === s));
-    if (f && s.item >= 0 && was < 0) {
+    const f = S.forklifts.find((q) => q.task && ((q.task.type === 'put' && q.task.to === s) || (q.task.type === 'pick' && q.task.from === s)));
+    if (f && f.task.type === 'put' && s.item >= 0 && was < 0) {
       const it = itemName(s.item);
-      record({ action: 'Put away', code: s.code, mat: it.mat, name: it.name, qty: s.qty, by: 'Forklift ' + f.n, ref: 'Receiving door IN ' + f.task.from.door.n });
-    } else if (f && s.item < 0 && was >= 0) {
+      record({ action: 'Put away', code: s.code, mat: it.mat, name: it.name, qty: s.qty, by: 'Forklift ' + f.n, ref: f.task.from.door ? 'Receiving door IN ' + f.task.from.door.n : '' });
+    } else if (f && f.task.type === 'pick' && s.item < 0 && was >= 0) {
       const it = itemName(was);
       B.audit.record({ action: 'Picked for issue', code: s.code, mat: it ? it.mat : '', name: it ? it.name : '', qty: wasQty, by: 'Forklift ' + f.n, ref: f.task.order ? f.task.order.id : '' });
     } else pending.push({ s, was, wasQty });

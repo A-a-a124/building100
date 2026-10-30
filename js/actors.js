@@ -12,9 +12,12 @@
   // ---------- low-poly person ----------
   function limb(w, h, d, color, y) {
     const g = new T.Group();
-    const m = W.box(w, h, d, color);
-    m.position.y = -h / 2;
-    g.add(m);
+    // rounded limb: tapered cylinder with a ball joint at the top
+    const m = new T.Mesh(new T.CylinderGeometry(w * 0.55, w * 0.46, h, 10), W.mat(color));
+    m.scale.z = d / w; m.position.y = -h / 2; m.castShadow = true;
+    const joint = new T.Mesh(new T.SphereGeometry(w * 0.56, 10, 8), W.mat(color));
+    joint.scale.z = d / w; joint.castShadow = true;
+    g.add(m, joint);
     g.position.y = y;
     return g;
   }
@@ -29,12 +32,17 @@
     const legR = limb(0.15 * gth, legH, 0.17 * gth, pants, legH);
     legL.position.x = -hipW;
     legR.position.x = hipW;
-    [legL, legR].forEach((l) => { const shoe = W.box(0.16 * gth, 0.08, 0.28, '#1f1f1f'); shoe.position.set(0, -legH + 0.04, 0.05); l.add(shoe); });
+    [legL, legR].forEach((l) => { const shoe = W.box(0.15 * gth, 0.08, 0.24, '#1f1f1f'); shoe.position.set(0, -legH + 0.04, 0.03); const toe = new T.Mesh(new T.SphereGeometry(0.075 * gth, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), W.mat('#1f1f1f')); toe.scale.set(1, 0.9, 1.1); toe.position.set(0, -legH + 0.005, 0.15); l.add(shoe, toe); });
     body.add(legL, legR);
     const top = o.thobe ? '#f4f4f0' : o.shirt || '#ff8a1f';
-    const torso = W.box(0.44 * gth, torsoH, 0.26 * gth, top);
-    torso.position.y = legH + torsoH / 2;
-    body.add(torso);
+    // shaped torso: wider at the chest, rounded front and back, with a neck
+    const torso = new T.Mesh(new T.CylinderGeometry(0.235 * gth, 0.2 * gth, torsoH, 16), W.mat(top));
+    torso.scale.z = 0.6; torso.position.y = legH + torsoH / 2; torso.castShadow = true;
+    const chest = new T.Mesh(new T.SphereGeometry(0.235 * gth, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), W.mat(top));
+    chest.scale.set(1, 0.32, 0.6); chest.position.y = legH + torsoH; chest.castShadow = true;
+    const neck = new T.Mesh(new T.CylinderGeometry(0.05 * s, 0.058 * s, 0.1 * s, 10), W.mat(o.skin));
+    neck.position.y = legH + torsoH + 0.05 * s;
+    body.add(torso, chest, neck);
     if (o.thobe) {
       // long white thobe down to the ankles
       const skirt = new T.Mesh(new T.CylinderGeometry(0.27 * gth, 0.33 * gth, legH * 0.95, 14), W.mat('#f4f4f0'));
@@ -42,7 +50,9 @@
       skirt.castShadow = true;
       body.add(skirt);
     } else if (o.vest) {
-      [0.35, 0.65].forEach((k) => { const band = W.box(0.45 * gth, 0.035, 0.27 * gth, '#d9dde1', { emissive: '#ffffff', emissiveIntensity: 0.25 }); band.position.y = legH + torsoH * k; body.add(band); });
+      // reflective bands wrapped round the vest, plus shoulder straps
+      [0.35, 0.65].forEach((k) => { const r = 0.2 * gth + 0.035 * gth * k + 0.008; const band = new T.Mesh(new T.CylinderGeometry(r, r, 0.04, 16, 1, true), W.mat('#e6e9ec', { emissive: '#ffffff', emissiveIntensity: 0.3, metalness: 0.5, roughness: 0.3 })); band.scale.z = 0.62; band.position.y = legH + torsoH * k; body.add(band); });
+      [-1, 1].forEach((sd) => { const strap = W.box(0.05, torsoH * 0.95, 0.02, '#e6e9ec', { emissive: '#ffffff', emissiveIntensity: 0.3 }); strap.position.set(sd * 0.1 * gth, legH + torsoH * 0.5, 0.145 * gth); body.add(strap); });
     }
     if (gth > 1.2) {
       const belly = new T.Mesh(new T.SphereGeometry(0.2 * gth, 14, 10), W.mat(top));

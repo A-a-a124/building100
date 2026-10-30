@@ -7,7 +7,7 @@
   const R = B.rng(808);
   const M4 = new T.Matrix4(), Q = new T.Quaternion(), V = new T.Vector3(), SC = new T.Vector3();
   const baseHemi = hemi.intensity;
-  const night = () => 1 - Math.max(0, Math.min(1, (hemi.intensity / baseHemi - 0.3) / 0.7));
+  const night = () => 1 - Math.max(0, Math.min(1, (hemi.intensity / baseHemi - 0.25) / 0.55)); // daylight fill is softened by the realism pass, so full day reads about 0.82
   const glowTex = (() => {
     const c = document.createElement('canvas'); c.width = c.height = 128;
     const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);

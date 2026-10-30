@@ -68,8 +68,8 @@
     if (haze > 0.01) {
       sun.intensity *= 1 - 0.6 * haze; hemi.intensity *= 1 - 0.25 * haze;
       scene.background.lerp(DUST, 0.75 * haze);
-      if (scene.fog) { const cd = camera.position.distanceTo(B.three.controls.target); scene.fog.color.copy(scene.background); scene.fog.near = Math.max(220 - 205 * haze, cd * 0.55); scene.fog.far = Math.max(520 - 380 * haze, cd * 1.6); }
-    } else if (scene.fog && scene.fog.near !== 220) { scene.fog.near = 220; scene.fog.far = 520; }
+      if (scene.fog) { const cd = camera.position.distanceTo(B.three.controls.target); scene.fog.color.copy(scene.background); scene.fog.near = Math.max(340 - 325 * haze, cd * 0.55); scene.fog.far = Math.max(980 - 840 * haze, cd * 1.6); }
+    }
     dustPts.visible = haze > 0.05;
     if (dustPts.visible) {
       dustPts.material.opacity = 0.55 * haze;

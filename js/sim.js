@@ -121,23 +121,7 @@
     door = door || W.doorsIn.find((d) => !d.busy);
     if (!door || (dir === 'out' && door.busy)) return null;
     W.setDoorLamp(door, true);
-    const g = new T.Group();
-    const trailer = W.box(2.5, 2.9, 12, '#d9dde1');
-    trailer.position.set(0, 2.25, -6);
-    const stripe = W.box(2.52, 0.3, 12, dir === 'in' ? '#2b5c9c' : '#d08a12');
-    stripe.position.set(0, 1.6, -6);
-    const cab = W.box(2.5, 2.6, 2.4, '#f4f6f8');
-    cab.position.set(0, 1.9, -13.6);
-    const glass = W.box(2.3, 0.9, 0.05, '#27313b', { metalness: 0.6, roughness: 0.2 });
-    glass.position.set(0, 2.6, -14.82);
-    g.add(trailer, stripe, cab, glass);
-    const wg = new T.CylinderGeometry(0.5, 0.5, 0.4, 14);
-    [-1.6, -3, -12.8].forEach((z) => [-1.1, 1.1].forEach((x) => {
-      const w = new T.Mesh(wg, W.mat('#1c1f22'));
-      w.rotation.z = Math.PI / 2;
-      w.position.set(x, 0.5, z);
-      g.add(w);
-    }));
+    const g = W.makeTruck(dir);
     const outZ = door.z - door.dir * 60;
     g.rotation.y = dir === 'in' ? 0 : Math.PI;
     g.position.set(door.x, 0, outZ);

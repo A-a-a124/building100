@@ -5,11 +5,46 @@
   const sar = (n) => B.stock.sar(n);
   const heat = (on) => { const c = document.getElementById('lyCong'); if (c && c.checked !== on) { c.checked = on; c.dispatchEvent(new Event('change')); } };
 
+  // ---------- "your data goes in": a demo SAP export loads live, then the sample stock comes back ----------
+  let demoSaved = null, before = null, after = null;
+  function demoRows() {
+    const R = B.rng(2027), rows = [['Material', 'Description', 'Quantity', 'Unit', 'Storage Bin', 'Last Movement', 'Material Group', 'Unit Price', 'Owner']];
+    const names = [['GATE VALVE 8IN ANSI 600', 'VALVES', 9800], ['BALL VALVE 3IN ANSI 300', 'VALVES', 2100], ['CENTRIFUGAL PUMP SEAL KIT', 'MECH SPARES', 7400], ['BEARING 6318-2RS', 'MECH SPARES', 880],
+      ['PRESSURE TRANSMITTER 0-250 BAR', 'INSTRUMENTS', 6100], ['FLOW METER ULTRASONIC 6IN', 'INSTRUMENTS', 42000], ['CABLE 4X185MM2 1KV', 'ELECTRICAL', 54000], ['SWITCHGEAR BREAKER 1250A', 'ELECTRICAL', 31000],
+      ['WELD NECK FLANGE 12IN 600#', 'FLANGES', 1450], ['SPIRAL WOUND GASKET 8IN', 'GASKETS', 75], ['STUD BOLT B7 1IN X 8IN', 'GASKETS', 31], ['SAFETY HARNESS FULL BODY', 'PPE', 640], ['HYDRAULIC OIL VG68 208L', 'CONSUMABLES', 2900]];
+    const owners = ['Aramco', 'Aramco', 'Aramco', 'Aramco', 'Contractor A', 'Contractor B'];
+    const now = Date.now();
+    B.SLOTS.forEach((s) => {
+      if (R() > 0.86) return;
+      const [d, g, p] = names[Math.floor(R() * names.length)];
+      const age = Math.floor(Math.pow(R(), 1.5) * 700);
+      rows.push(['1001' + String(Math.floor(R() * 1e6)).padStart(6, '0'), d, String(p > 10000 ? 1 + Math.floor(R() * 3) : p > 1000 ? 2 + Math.floor(R() * 10) : 20 + Math.floor(R() * 180)), 'EA', s.code, new Date(now - age * 864e5).toISOString().slice(0, 10), g, String(p), owners[Math.floor(R() * owners.length)]]);
+    });
+    return rows;
+  }
+  function loadDemo() {
+    demoSaved = { items: B.ITEMS.map((it) => Object.assign({}, it)), slots: B.SLOTS.map((s) => [s.item, s.qty, s.days, s.owner]), info: B.importInfo };
+    before = B.stock.compute(true);
+    B.importer.apply(demoRows(), 'SAP stock export (demo)');
+    after = B.stock.compute(true);
+    const hm = document.getElementById('lyHeat'); if (hm && !hm.checked) { hm.checked = true; hm.dispatchEvent(new Event('change')); }
+  }
+  function restore() {
+    const hm = document.getElementById('lyHeat'); if (hm && hm.checked) { hm.checked = false; hm.dispatchEvent(new Event('change')); }
+    if (!demoSaved) return;
+    B.ITEMS.length = 0; demoSaved.items.forEach((it) => B.ITEMS.push(it));
+    Object.keys(B.itemsByCat).forEach((k) => (B.itemsByCat[k].length = 0)); B.ITEMS.forEach((it) => (B.itemsByCat[it.cat] = B.itemsByCat[it.cat] || []).push(it.i));
+    B.SLOTS.forEach((s, i) => { [s.item, s.qty, s.days, s.owner] = demoSaved.slots[i]; s.reserved = false; W.updateSlot(s, true); });
+    W.flagPallets(); S.occ = B.occupiedCount(); B.importInfo = demoSaved.info; if (B.slotting) B.slotting.clear(); B.panel.renderZones();
+    demoSaved = null;
+  }
+
   // each scene: where the camera goes, a title, and a line built from the model at that moment
   const SCENES = [
     { view: 'overview', title: 'Building 100 · a live digital twin', line: () => 'The whole materials warehouse in 3D: ' + fmt(B.SLOTS.length) + ' pallet positions, ' + S.forklifts.length + ' forklifts, 2 drones and the open yard, running a live simulation.' },
     { view: 'rcv', title: 'Trucks arrive on booked slots', line: () => { const c = B.carriers.recs.filter((r) => r.docked != null), on = c.filter((r) => r.gate - r.appt <= 300).length; return c.length ? on + ' of ' + c.length + ' trucks so far arrived on time. Late carriers and gate waiting are tracked per company.' : 'Every truck has a carrier and a booked slot; late arrivals and waiting at the gate are tracked per company.'; } },
     { view: 'rack', title: 'Every pallet is known', line: () => { const st = B.stock.compute(); return 'Stock worth ' + sar(st.total) + '. ' + fmt(st.frozenPallets) + ' pallets have not moved for a year and cost ' + sar(st.holdFrozen) + ' a year to keep.'; } },
+    { view: 'rack', title: 'Your data goes in, the twin updates', enter: loadDemo, leave: restore, line: () => 'A stock export from SAP just loaded: ' + fmt(B.importInfo.rows) + ' lines placed by bin code. Stock value ' + sar(before.total) + ' → ' + sar(after.total) + ', frozen pallets ' + fmt(before.frozenPallets) + ' → ' + fmt(after.frozenPallets) + '. Red pallets are the oldest stock.' },
     { view: 'aisle', title: 'Drones count the high shelves', line: () => 'About ' + fmt(B.cycle.plan().due.length) + ' locations are counted every week instead of one yearly stock-take. Drone D1 flies the top levels.' },
     { view: 'team', title: 'People and forklifts share the floor', line: () => 'Forklifts stopped or gave way ' + fmt(S.st.yields || 0) + ' times. Every near miss is logged with its place, so the risky spots show up.' },
     { view: 'top', title: 'Where the floor is busy', line: () => 'The congestion heatmap shows where forklifts and people spend their time: the base for safer walkways and better slotting.', enter: () => heat(true), leave: () => heat(false) },
