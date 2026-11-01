@@ -25,6 +25,7 @@
   const update = W.updateSlot;
   W.updateSlot = function (s, noFlag) {
     update(s, noFlag);
+    if (B.audit.mute) { prev[s.i] = s.item; prevQty[s.i] = s.qty; return; } // showing a past moment is not a change
     const was = prev[s.i], wasQty = prevQty[s.i];
     if (was === s.item && wasQty === s.qty) return;
     prev[s.i] = s.item; prevQty[s.i] = s.qty;

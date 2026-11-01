@@ -12,6 +12,7 @@
     const acc = B.cycle.accuracy();
     return [
       { name: 'Order cycle time', unit: 'min', before: a.cycle, after: b.cycle, d: 1, how: 'Fast movers re-slotted next to the shipping doors' },
+      { name: 'Picking time per order', unit: 'min', before: a.pick, after: b.pick, d: 1, how: 'Floor time only: less driving for each pick' },
       { name: 'Average pick trip', unit: 'm', before: plan.before, after: plan.after, d: 0, how: 'Same re-slotting plan' },
       { name: 'Forklift driving a year', unit: 'km', before: (picks * 2 * plan.before) / 1000, after: (picks * 2 * plan.after) / 1000, d: 0, how: 'Fewer metres per pick' },
       { name: 'Cost of keeping frozen stock', unit: 'SAR/yr', before: st.holdFrozen, after: 0, d: 0, money: true, how: 'Pallets not moved for a year sold, returned or written off' },

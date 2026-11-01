@@ -6,7 +6,7 @@
   // [id, name, unit, good limit, warning limit, direction]: 'max' = lower is better, 'band' = between the two
   const T = [
     { id: 'occ', name: 'Rack occupancy', unit: '%', good: 85, warn: 92, dir: 'max', get: (k) => k.occ * 100 },
-    { id: 'cycle', name: 'Order cycle time', unit: 'min', good: 30, warn: 45, dir: 'max', get: (k) => k.cycle },
+    { id: 'cycle', name: 'Order cycle time', unit: 'min', good: 60, warn: 90, dir: 'max', get: (k) => k.cycle },
     { id: 'util', name: 'Forklift utilisation', unit: '%', good: 55, warn: 85, dir: 'band', get: (k) => k.util * 100 },
     { id: 'open', name: 'Open tasks', unit: '', good: 15, warn: 30, dir: 'max', get: (k) => k.open },
     { id: 'near', name: 'Near misses', unit: '', good: 5, warn: 15, dir: 'max', get: () => S.st.nearMiss || 0 },

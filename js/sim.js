@@ -142,7 +142,7 @@
 
   function newOrder(n) {
     const lines = n ? Math.min(6, n) : 2 + Math.floor(R() * 5);
-    const order = { id: 'SO-' + orderSeq++, lines, picked: 0, created: S.st.t, door: null, pos: [] };
+    const order = { id: 'SO-' + orderSeq++, lines, picked: 0, created: S.st.t, door: null, pos: [], readyAt: S.st.t + (8 + R() * 12) * 60 }; // order checked and printed before picking
     S.pendingOrders.push(order);
     log('New issue order ' + order.id + ' (' + lines + ' pallets)', 'out');
   }
@@ -150,7 +150,7 @@
   function releaseOrders() {
     while (S.pendingOrders.length) {
       const door = W.doorsOut.find((d) => !d.busy && !S.orders.some((o) => o.door === d));
-      if (!door) return;
+      if (!door || (S.pendingOrders[0].readyAt || 0) > S.st.t) return;
       const cand = B.SLOTS.filter((s) => s.item >= 0 && !s.reserved);
       if (cand.length < S.pendingOrders[0].lines) return;
       const o = S.pendingOrders.shift();
@@ -278,9 +278,9 @@
             t.to.used = p;
             t.order.picked++;
             if (t.order.picked === t.order.lines) {
-              const tr = spawnTruck('out', t.order.door);
-              if (tr) { tr.order = t.order; tr.done = 0; log('Order ' + t.order.id + ' ready to load at door OUT ' + t.order.door.n, 'out'); }
-              else t.order.waitTruck = true;
+              // the collecting truck is called once the order is staged
+              t.order.waitTruck = true; t.order.truckAt = S.st.t + (10 + R() * 15) * 60;
+              log('Order ' + t.order.id + ' staged at door OUT ' + t.order.door.n + ', truck called', 'out');
             }
           }
         });
@@ -309,10 +309,10 @@
     if (tr.phase === 'arrive') {
       const d = tr.dockZ - tr.z;
       tr.z += Math.sign(d) * Math.min(Math.abs(d), sp * dt);
-      if (Math.abs(d) < 0.01) { tr.phase = 'work'; tr.timer = 0; }
+      if (Math.abs(d) < 0.01) { tr.phase = 'work'; tr.timer = -300; } // 5 minutes of gate paperwork and securing the truck
     } else if (tr.phase === 'work') {
       tr.timer += dt;
-      if (tr.timer > 20) {
+      if (tr.timer > 120) { // about 2 minutes to unload or load and check each pallet
         tr.timer = 0;
         if (tr.dir === 'in') {
           if (tr.done < tr.count) {
@@ -375,7 +375,7 @@
     if (S.gate && S.gate.length && W.doorsIn.some((d) => !d.busy)) { const g = S.gate.shift(); S.gateRetry = true; const tr = newInbound(g.n); S.gateRetry = false; if (tr) tr.gateWait = S.st.t - g.t; else S.gate.unshift(g); }
     releaseOrders();
     S.orders.forEach((o) => {
-      if (o.waitTruck) { const tr = spawnTruck('out', o.door); if (tr) { tr.order = o; tr.done = 0; o.waitTruck = false; } }
+      if (o.waitTruck && S.st.t >= (o.truckAt || 0)) { const tr = spawnTruck('out', o.door); if (tr) { tr.order = o; tr.done = 0; o.waitTruck = false; } }
     });
     assign();
     S.forklifts.slice().forEach((f) => updateForklift(f, dt));

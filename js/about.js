@@ -24,6 +24,8 @@
       ]],
       ['Flow and people', [
         ['Arrivals', fmt(r.trucks, 1) + ' trucks and ' + fmt(r.orders, 1) + ' issue orders an hour (' + r.name + ' workload), lower on the evening and night shifts', 'model', 'Replay a day with your own receipts and issues'],
+        ['Process times', 'Order checking 8-20 min, truck called and arriving 10-25 min, 5 min of paperwork at the door, 2 min to load or unload each pallet', 'ind', 'Typical figures, adjust to your own time study'],
+        ['Daily rhythm', 'Busiest 08-11 (1.6 times the average) and 13-15 (1.3 times)', 'model', 'Replace with your own pattern using Replay a day'],
         ['Shifts', 'Day 07-15, evening 15-23, night 23-07, each with a 30-minute meal break', 'model', ''],
         ['Carriers', 'Five made-up transport companies, 12-40% of trucks late', 'sample', 'Names are fictional'],
         ['Walking speed in a drill', '1.3 m/s after 30 s to react; target to clear the building 3 minutes', 'ind', 'Common site target, check your own emergency plan'],

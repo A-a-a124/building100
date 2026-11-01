@@ -37,13 +37,15 @@
       if (k.o) k.o.done = Math.max(k.o.done, start + dur);
     });
     const shipped = orders.filter((o) => o.done && o.done < H);
-    const cycle = shipped.reduce((n, o) => n + (o.done - o.t + o.lines * 15 + 10), 0) / Math.max(1, shipped.length) / 60;
-    return { cycle, util: busy / (cfg.forklifts * H), waitAvg: waitSum / Math.max(1, tasks.length) / 60, waitMax: waitMax / 60, km, tasks: tasks.length, orders: orders.length };
+    // floor time plus order checking (about 14 min), waiting for the called truck (about 17 min) and loading (2 min a pallet, 5 min at the door)
+    const pick = shipped.reduce((n, o) => n + (o.done - o.t), 0) / Math.max(1, shipped.length) / 60;
+    const cycle = shipped.reduce((n, o) => n + (o.done - o.t + 14 * 60 + 17 * 60 + 300 + o.lines * 120), 0) / Math.max(1, shipped.length) / 60;
+    return { cycle, pick, util: busy / (cfg.forklifts * H), waitAvg: waitSum / Math.max(1, tasks.length) / 60, waitMax: waitMax / 60, km, tasks: tasks.length, orders: orders.length };
   }
   function simulate(cfg) {
     const runs = [11, 23, 37, 51, 73].map((s) => run(cfg, s));
     const avg = (k) => runs.reduce((n, r) => n + r[k], 0) / runs.length;
-    return { cycle: avg('cycle'), util: avg('util'), waitAvg: avg('waitAvg'), waitMax: avg('waitMax'), km: avg('km'), tasks: avg('tasks'), orders: avg('orders') };
+    return { cycle: avg('cycle'), pick: avg('pick'), util: avg('util'), waitAvg: avg('waitAvg'), waitMax: avg('waitMax'), km: avg('km'), tasks: avg('tasks'), orders: avg('orders') };
   }
 
   // ---------- Compare tab ----------
@@ -157,5 +159,5 @@
 
   B.tools.add({ id: 'compare', label: 'Compare', render: renderCompare });
   B.tools.add({ id: 'forecast', label: 'Forecast', render: renderForecast });
-  B.analysis = { simulate };
+  B.analysis = { simulate, run };
 })();

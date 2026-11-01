@@ -339,6 +339,8 @@
     ['yard', 'YARD', 'Open storage yard', 'Line pipe, cable drums, steel and containers outside. Drone D2 surveys the yard from 16 m.'],
     ['dsp', 'DSP', 'Shipping and issue', 'Forklifts gather the pallets for each issue order in front of a door, then a truck loads them.'],
     // the operations tools, each opened in the Data & analysis panel
+    ['overview', null, 'Look ahead', 'The twin runs the next 8 hours from the exact state of the warehouse and warns about queues, full rows and busy forklifts before they happen.', 'predict'],
+    ['overview', null, 'Best setup', 'It tries every combination of fleet, slotting, picking and charging, and shows the winner with the yearly saving.', 'optimize'],
     ['overview', null, 'Alerts and the daily task list', 'The bell collects what needs attention: full rows, critical spares below minimum, hazmat breaches, broken forklifts, trucks waiting. It also builds the supervisor’s task list for the day.', 'alerts'],
     ['overview', null, 'What the stock is worth', 'Value in riyals, ABC and XYZ classes, frozen stock that has not moved for a year, and what each pallet costs to keep.', 'value'],
     ['rack', null, 'Who owns what', 'The warehouse stores for Aramco and other companies. Each company has its own block of racking, its fill rate and its monthly storage charge.', 'owners'],

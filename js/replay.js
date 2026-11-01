@@ -50,7 +50,7 @@
       if (k.o) k.o.done = Math.max(k.o.done, start + dur);
     });
     const span = Math.max(3600, Math.max(...free) - d.ev[0].t);
-    const cyc = orders.map((o) => (o.done - o.t + o.lines * 15 + 10) / 60);
+    const cyc = orders.map((o) => (o.done - o.t + 14 * 60 + 17 * 60 + 300 + o.lines * 120) / 60);
     return { cycle: cyc.reduce((a, b) => a + b, 0) / Math.max(1, cyc.length), util: busy / (forklifts * span), waitMax: waitMax / 60, backlog, end: Math.max(...free), orders };
   }
   function analyse() {

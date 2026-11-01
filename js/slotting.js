@@ -104,5 +104,5 @@
   }
 
   B.tools.add({ id: 'slotting', label: 'Slotting', render });
-  B.slotting = { cost, velocity, analyse, clear: () => { showMoves(false); plan = null; }, plan: () => plan || analyse() };
+  B.slotting = { applyAll: () => applyMoves(1e9), cost, velocity, analyse, clear: () => { showMoves(false); plan = null; }, plan: () => plan || analyse() };
 })();
