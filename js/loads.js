@@ -75,15 +75,12 @@
   const crateGeo = merge([[cube, new T.Matrix4(), '#ffffff'],
     [cube, mt(0, 0.47, 0, 1.03, 0.07, 1.03), '#b38654'], [cube, mt(0, -0.47, 0, 1.03, 0.07, 1.03), '#b38654'],
     ...[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => [cube, mt(a * 0.495, 0, b * 0.495, 0.07, 1, 0.07), '#a97c49'])]);
-  const can = new T.CylinderGeometry(0.235, 0.235, 0.96, 14);
-  const lid = new T.CylinderGeometry(0.245, 0.245, 0.025, 14);
-  const drumGeo = merge([[-1, -1], [1, -1], [-1, 1], [1, 1]].flatMap(([a, b]) => [
-    [can, mt(a * 0.26, 0, b * 0.25), '#ffffff'], [lid, mt(a * 0.26, 0.485, b * 0.25), '#c2c6ca'], [lid, mt(a * 0.26, -0.485, b * 0.25), '#c2c6ca']]));
-  const flange = new T.CylinderGeometry(0.5, 0.5, 0.07, 18);
-  const barrel = new T.CylinderGeometry(0.4, 0.4, 0.74, 18, 1, true);
-  const hub = new T.CylinderGeometry(0.08, 0.08, 0.92, 8);
+  const can = new T.CylinderGeometry(0.24, 0.24, 1, 10);
+  const drumGeo = merge([[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b]) => [can, mt(a * 0.26, 0, b * 0.25), '#ffffff']));
+  const flange = new T.CylinderGeometry(0.5, 0.5, 0.07, 14);
+  const barrel = new T.CylinderGeometry(0.4, 0.4, 0.74, 14, 1, true);
   const reelGeo = merge([[barrel, mt(0, 0, 0, 1, 1, 1, 0, Math.PI / 2), '#2a2d31'],
-    [flange, mt(-0.4, 0, 0, 1, 1, 1, 0, Math.PI / 2), '#b68a56'], [flange, mt(0.4, 0, 0, 1, 1, 1, 0, Math.PI / 2), '#b68a56'], [hub, mt(0, 0, 0, 1, 1, 1, 0, Math.PI / 2), '#6c7076']]);
+    [flange, mt(-0.4, 0, 0, 1, 1, 1, 0, Math.PI / 2), '#b68a56'], [flange, mt(0.4, 0, 0, 1, 1, 1, 0, Math.PI / 2), '#b68a56']]);
 
   function pool(geo, mat) {
     const mesh = new T.InstancedMesh(geo, mat, N);

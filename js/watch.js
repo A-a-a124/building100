@@ -43,12 +43,12 @@
   const walkIcon = B.loads.canvas(128, 128, (g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(64, 26, 13, 0, 7); g.fill(); g.lineCap = 'round'; g.lineWidth = 15; g.strokeStyle = '#ffffff'; g.beginPath(); g.moveTo(64, 46); g.lineTo(64, 82); g.moveTo(64, 82); g.lineTo(44, 116); g.moveTo(64, 82); g.lineTo(84, 116); g.moveTo(42, 66); g.lineTo(64, 52); g.lineTo(88, 68); g.stroke(); });
   const iconMat = new T.MeshBasicMaterial({ map: walkIcon, transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false });
   function paintWalk(r) {
-    const w = r.x[1] - r.x[0], d = r.z[1] - r.z[0], cx = (r.x[0] + r.x[1]) / 2, cz = (r.z[0] + r.z[1]) / 2;
-    const add = (ww, dd, x, z, m, y) => { const p = new T.Mesh(new T.PlaneGeometry(ww, dd), m); p.rotation.x = -Math.PI / 2; p.position.set(x, y || 0.03, z); p.renderOrder = 2; walkGroup.add(p); return p; };
-    add(w, d, cx, cz, walkMat);
-    add(w, 0.12, cx, r.z[0], walkEdge, 0.032); add(w, 0.12, cx, r.z[1], walkEdge, 0.032); add(0.12, d, r.x[0], cz, walkEdge, 0.032); add(0.12, d, r.x[1], cz, walkEdge, 0.032);
+    const w = r.x[1] - r.x[0], d = r.z[1] - r.z[0], cx = (r.x[0] + r.x[1]) / 2, cz = (r.z[0] + r.z[1]) / 2, edges = [], icons = [];
+    const plane = (ww, dd, x, z, y) => [new T.PlaneGeometry(ww, dd), mt(x, y, z, 1, 1, 1, -Math.PI / 2)];
+    edges.push(plane(w, 0.12, cx, r.z[0], 0.032), plane(w, 0.12, cx, r.z[1], 0.032), plane(0.12, d, r.x[0], cz, 0.032), plane(0.12, d, r.x[1], cz, 0.032));
     const n = Math.floor(Math.max(w, d) / 16);
-    for (let k = 0; k < n; k++) { const t = (k + 0.5) / n; add(1.3, 1.3, w > d ? r.x[0] + w * t : cx, w > d ? cz : r.z[0] + d * t, iconMat, 0.034); }
+    for (let k = 0; k < n; k++) { const t = (k + 0.5) / n; icons.push(plane(1.3, 1.3, w > d ? r.x[0] + w * t : cx, w > d ? cz : r.z[0] + d * t, 0.034)); }
+    [[[plane(w, d, cx, cz, 0.03)], walkMat], [edges, walkEdge], [icons, iconMat]].forEach(([list, m]) => { if (!list.length) return; const p = new T.Mesh(merge(list), m); p.renderOrder = 2; walkGroup.add(p); });
   }
   WALKS.forEach(paintWalk);
 
@@ -79,9 +79,6 @@
   CAMS.forEach((c) => {
     c.cam = new T.PerspectiveCamera(56, 16 / 9, 0.3, 130);
     c.cam.position.set(...c.pos); c.cam.lookAt(...c.look); c.cam.updateMatrixWorld(true); c.cam.updateProjectionMatrix();
-    const m = new T.Mesh(camBody, camMat); m.position.set(...c.pos); m.lookAt(...c.look); rigGroup.add(m);
-    const arm = new T.Mesh(new T.CylinderGeometry(0.03, 0.03, 0.5, 6), W.mat('#59626b')); arm.position.set(c.pos[0], c.pos[1] + 0.3, c.pos[2]); rigGroup.add(arm);
-    const led = new T.Mesh(new T.SphereGeometry(0.035, 6, 6), ledMat); led.position.set(...c.pos); led.position.y += 0.06; led.translateOnAxis(new T.Vector3(...c.look).sub(new T.Vector3(...c.pos)).normalize(), 0.3); rigGroup.add(led);
     // view cone reaching the floor
     const d = new T.Vector3(...c.look).sub(new T.Vector3(...c.pos)), len = d.length(), hw = Math.tan((56 / 2) * Math.PI / 180) * len;
     const verts = [[0, 0, 0], [-hw * 1.5, -hw * 0.85, len], [hw * 1.5, -hw * 0.85, len], [hw * 1.5, hw * 0.85, len], [-hw * 1.5, hw * 0.85, len]];
@@ -89,6 +86,15 @@
     const cone = new T.Mesh(geo, new T.MeshBasicMaterial({ color: '#39d1ff', transparent: true, opacity: 0.09, depthWrite: false, side: T.DoubleSide, toneMapped: false }));
     cone.position.set(...c.pos); cone.lookAt(...c.look); cone.renderOrder = 7; coneGroup.add(cone); c.cone = cone;
   });
+  // housings, arms and recording lights as one instanced mesh each
+  const rigBody = new T.InstancedMesh(camBody, camMat, CAMS.length), rigArm = new T.InstancedMesh(new T.CylinderGeometry(0.03, 0.03, 0.5, 6), W.mat('#59626b'), CAMS.length), rigLed = new T.InstancedMesh(new T.SphereGeometry(0.035, 6, 6), ledMat, CAMS.length);
+  const ob = new T.Object3D();
+  CAMS.forEach((c, i) => {
+    ob.position.set(...c.pos); ob.lookAt(...c.look); ob.updateMatrix(); rigBody.setMatrixAt(i, ob.matrix);
+    ob.position.y += 0.06; ob.translateZ(0.3); ob.updateMatrix(); rigLed.setMatrixAt(i, ob.matrix);
+    ob.rotation.set(0, 0, 0); ob.position.set(c.pos[0], c.pos[1] + 0.3, c.pos[2]); ob.updateMatrix(); rigArm.setMatrixAt(i, ob.matrix);
+  });
+  [rigBody, rigArm, rigLed].forEach((m) => { m.frustumCulled = false; rigGroup.add(m); });
   const P3 = new T.Vector3();
   // the first camera that really has this point in its picture
   function seenBy(x, y, z) {
@@ -293,7 +299,7 @@
     const now = performance.now() / 1000;
     walkers().forEach(tidyRoute);
     warnings(dt, now);
-    rigGroup.children.forEach((m) => { if (m.geometry.type === 'SphereGeometry') m.visible = Math.sin(now * 3) > 0; });
+    rigLed.visible = Math.sin(now * 3) > 0;
     if (!S.st.running || (B.evac && B.evac.active()) || (B.timeline && B.timeline.active())) { lastT = S.st.t; return; }
     const sdt = S.st.t - lastT;
     if ((tCheck += dt) < 0.15 || sdt <= 0) return;

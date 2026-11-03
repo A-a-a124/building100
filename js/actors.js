@@ -6,6 +6,7 @@
   const A = (B.actors = { list: [] });
   const RACK = B.RACK;
 
+  const CLOTH = (A.CLOTH = { beige: '#80694a', navy: '#050a1c', black: '#060607' }); // colours are lit in linear light, so they are set darker than they read on screen
   const SKIN = { dark: '#4b2f20', brown: '#6e4529', tan: '#a26e4a', arab: '#e0b994', fair: '#edc9a6' };
   const lerp = (a, b, k) => a + (b - a) * k;
 
@@ -111,6 +112,7 @@
       tag.position.y = hy + 0.55;
       g.add(tag);
     }
+    W.mergeStatic(g, new Set([...kitHat, ...kitVest, head]));
     g.userData = { kitHat, kitVest, legL, legR, armL, armR, elbowL: armL.userData.elbow, elbowR: armR.userData.elbow, body, head, legH, s, tag: g.children.find((c) => c.isSprite) };
     return g;
   }
@@ -351,22 +353,22 @@
     const ex = 44.6, dspZ = 31.2, frontZ = -25.0;
     const people = [
       { id: 'mansour', name: 'Mansour', role: '', watched: true, speed: 1.35, boxColor: '#c79a5b', about: '',
-        look: { height: 1.93, girth: 0.8, skin: SKIN.dark, shirt: '#ff8a1f', vest: true, hat: 'helmet', label: 'Mansour' },
+        look: { height: 1.93, girth: 0.8, skin: SKIN.dark, shirt: CLOTH.beige, pants: CLOTH.black, vest: true, hat: 'helmet', label: 'Mansour' },
         route: [{ x: 49.5, z: -22, pick: true }, { x: ex, z: -22 }, { x: ex, z: dspZ }, { x: 20, z: dspZ, drop: true }, { x: ex, z: dspZ }, { x: ex, z: -22 }] },
       { id: 'mohsen', name: 'Mohsen', role: '', watched: true, speed: 1.0, boxColor: '#b98a4e', about: '',
-        look: { height: 1.6, girth: 1.42, skin: SKIN.brown, shirt: '#ffb21f', vest: true, hat: 'helmet', label: 'Mohsen' },
+        look: { height: 1.6, girth: 1.18, skin: SKIN.brown, shirt: CLOTH.beige, pants: CLOTH.black, vest: true, hat: 'helmet', label: 'Mohsen' },
         route: [{ x: -47, z: -31.2, pick: true }, { x: -47, z: frontZ }, { x: ex + 0.8, z: frontZ }, { x: ex + 0.8, z: -12 }, { x: 49.5, z: -12, drop: true }, { x: ex + 0.8, z: -12 }, { x: ex + 0.8, z: frontZ }, { x: -47, z: frontZ }] },
       { id: 'w1', name: 'Warehouse worker', role: 'Material handler', watched: true, speed: 1.2, boxColor: '#d4a86a', anon: true,
         about: 'Pushes a hand cart of light cartons from the small parts store to the shipping lanes.',
-        look: { height: 1.74, girth: 1.0, skin: SKIN.tan, shirt: '#2a7fd4', pants: '#26303b', vest: true, hat: 'helmet', hatColor: '#ffffff' },
+        look: { height: 1.74, girth: 1.0, skin: SKIN.tan, shirt: CLOTH.beige, pants: CLOTH.black, vest: true, hat: 'helmet', hatColor: '#ffffff' },
         route: [{ x: 49.5, z: -30, pick: true }, { x: ex - 0.8, z: -30 }, { x: ex - 0.8, z: dspZ + 0.8 }, { x: 4, z: dspZ + 0.8, drop: true }, { x: ex - 0.8, z: dspZ + 0.8 }, { x: ex - 0.8, z: -30 }] },
       { id: 'w2', name: 'Warehouse worker', role: 'Material handler', watched: true, speed: 1.25, boxColor: '#c08c50', anon: true,
         about: 'Carries inspected small parts from quality inspection back to receiving.',
-        look: { height: 1.7, girth: 1.05, skin: SKIN.fair, shirt: '#3aa35b', vest: true, hat: 'helmet', hatColor: '#3a8bd8' },
+        look: { height: 1.7, girth: 1.05, skin: SKIN.fair, shirt: CLOTH.beige, pants: CLOTH.black, vest: true, hat: 'helmet', hatColor: '#3a8bd8' },
         route: [{ x: -54, z: -19, pick: true }, { x: -54, z: frontZ }, { x: -38, z: frontZ }, { x: -38, z: -30.5, drop: true }, { x: -38, z: frontZ }, { x: -54, z: frontZ }] },
       { id: 'w3', name: 'Warehouse worker', role: 'Material handler', watched: true, speed: 1.15, boxColor: '#d9b27a', anon: true,
         about: 'Takes small cartons from the shelving to the shipping marshalling area.',
-        look: { height: 1.8, girth: 0.95, skin: SKIN.brown, shirt: '#ff8a1f', vest: true, hat: 'helmet' },
+        look: { height: 1.8, girth: 0.95, skin: SKIN.brown, shirt: CLOTH.beige, pants: CLOTH.black, vest: true, hat: 'helmet' },
         route: [{ x: 49.5, z: -6, pick: true }, { x: ex + 1.6, z: -6 }, { x: ex + 1.6, z: dspZ - 0.8 }, { x: 32, z: dspZ - 0.8, drop: true }, { x: ex + 1.6, z: dspZ - 0.8 }, { x: ex + 1.6, z: -6 }] },
     ].map(walker);
     // hand cart for the first unnamed worker
@@ -400,11 +402,11 @@
     chair2.position.set(seat2.x, 0.25, seat2.z + 0.05);
     scene.add(monitor2, chair2);
     const abdullah = { id: 'abdullah', kind: 'person', name: 'Abdullah', role: 'Trainee', x: seat2.x, z: seat2.z, homeX: -2, homeZ: -25.2, seat: seat2, head: Math.PI, t: 0, state: 'desk', speed: 1.3, phase: 0, path: null, about: '',
-      mesh: makePerson({ height: 1.88, girth: 1.32, skin: SKIN.arab, shirt: '#ff8a1f', pants: '#26303b', vest: true, hat: 'helmet', hatColor: '#ffffff', label: 'Abdullah · Trainee' }), update: updateWatcher, status: 'Working at the computer' };
+      mesh: makePerson({ height: 1.88, girth: 1.15, skin: SKIN.arab, shirt: CLOTH.beige, pants: CLOTH.black, vest: true, hat: 'helmet', hatColor: '#ffffff', label: 'Abdullah · Trainee' }), update: updateWatcher, status: 'Working at the computer' };
     abdullah.mesh.position.set(seat2.x, 0, seat2.z);
     const nasser = { id: 'nasser', kind: 'person', name: 'Nasser', role: '', x: seat.x, z: seat.z, head: Math.PI, t: 0, state: 'desk', speed: 0.9, phase: 0, seat, coffee,
       about: '',
-      mesh: makePerson({ height: 1.62, girth: 1.0, skin: SKIN.fair, shirt: '#5a6b7d', pants: '#2b2f36', hat: 'cap', hatColor: '#14284b', label: 'Nasser' }), update: updateDesk, status: 'Working at the computer' };
+      mesh: makePerson({ height: 1.62, girth: 1.0, skin: SKIN.fair, shirt: CLOTH.navy, pants: CLOTH.black, hat: 'cap', hatColor: '#14284b', label: 'Nasser' }), update: updateDesk, status: 'Working at the computer' };
     nasser.cup = new T.Mesh(new T.CylinderGeometry(0.04, 0.035, 0.1, 12), W.mat('#f2f2f2'));
     nasser.cup.position.set(0, -0.33 * nasser.mesh.userData.s, 0.06);
     nasser.cup.visible = false;
@@ -413,7 +415,7 @@
 
     const ghazi = { id: 'ghazi', kind: 'person', name: 'Ghazi', role: 'Supervisor', x: 10, z: -25.8, head: 0, t: 0, ti: -1, state: 'go', speed: 1.7, phase: 0, path: null,
       about: '',
-      mesh: makePerson({ height: 1.76, girth: 1.08, skin: SKIN.tan, shirt: '#2e8b57', pants: '#3a3f47', hat: 'helmet', hatColor: '#ffffff', label: 'Ghazi · Supervisor' }), update: updateChatter, status: 'On floor rounds' };
+      mesh: makePerson({ height: 1.76, girth: 1.08, skin: SKIN.tan, shirt: CLOTH.navy, pants: CLOTH.black, hat: 'helmet', hatColor: '#ffffff', label: 'Ghazi · Supervisor' }), update: updateChatter, status: 'On floor rounds' };
     ghazi.mesh.position.set(ghazi.x, 0, ghazi.z);
 
     const chg = B.zoneById('CHG'), yz = B.zoneById('YARD');

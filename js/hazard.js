@@ -7,7 +7,7 @@
   const $ = (id) => document.getElementById(id);
   const CAM = [[-24, 5, -25.4], [12, 0.6, -26.6]];
 
-  const person = (o) => A.makePerson(Object.assign({ height: 1.74, girth: 1, skin: '#a8754f', shirt: '#2a7fd4', pants: '#26303b' }, o));
+  const person = (o) => A.makePerson(Object.assign({ height: 1.74, girth: 1, skin: '#a8754f', shirt: A.CLOTH.beige, pants: A.CLOTH.black }, o));
   // each builder returns a group placed in the scene; the point is what the player has to click
   const HAZ = [
     { name: 'Worker without a helmet', why: 'Head protection is required everywhere on the floor.', at: [-5, 1.2, -25.2], make: () => { const g = person({ vest: true }); g.rotation.y = 0.8; return g; } },

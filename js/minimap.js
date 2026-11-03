@@ -15,6 +15,24 @@
     .mmap canvas { display: block; width: ${CW}px; height: ${CH}px; cursor: crosshair; } .mmap.closed canvas { display: none; } body.cine .mmap { display: none; }`;
   document.head.appendChild(css);
   const head = box.querySelector('.mmhead'), cv = box.querySelector('canvas');
+  // the view buttons wrap to more rows as the window narrows: everything on the right stacks underneath them
+  const viewsBar = document.getElementById('views'), chipEl = document.querySelector('.wxchip'), layersEl = document.querySelector('.ovl.layers');
+  layersEl.style.flexWrap = 'nowrap'; layersEl.style.overflowY = 'auto'; layersEl.style.boxSizing = 'border-box';
+  function stack() {
+    if (!viewsBar.offsetHeight || !stage.offsetHeight) return;
+    const fit = (narrow) => {
+      viewsBar.style.maxWidth = narrow ? 'calc(100% - 290px)' : '';
+      const top = narrow ? 12 : viewsBar.offsetTop + viewsBar.offsetHeight + 8;
+      chipEl.style.top = top + 'px';
+      box.style.top = top + chipEl.offsetHeight + 6 + 'px';
+      return stage.offsetHeight - (box.offsetTop + box.offsetHeight) - 22;
+    };
+    let room = fit(false);
+    if (room < 200) room = fit(true);
+    layersEl.style.maxHeight = Math.max(90, room) + 'px';
+  }
+  if (window.ResizeObserver) { const ro = new ResizeObserver(stack); [viewsBar, box, stage].forEach((e) => ro.observe(e)); }
+  setTimeout(stack, 300);
   const setOpen = (o) => { box.classList.toggle('closed', !o); head.setAttribute('aria-expanded', o); head.querySelector('b').textContent = o ? '–' : '+'; store.set('b100.map', o ? '1' : '0'); };
   setOpen(store.get('b100.map') ? store.get('b100.map') === '1' : innerWidth > 760);
   head.addEventListener('click', () => setOpen(box.classList.contains('closed')));

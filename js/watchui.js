@@ -11,6 +11,7 @@
   const rt = new T.WebGLRenderTarget(FW, FH, { minFilter: T.LinearFilter, magFilter: T.LinearFilter });
   rt.texture.encoding = renderer.outputEncoding;
   const px = new Uint8Array(FW * FH * 4);
+  const IDENT = new Uint8Array(256).map((_, i) => i), GAMMA = new Uint8Array(256).map((_, i) => Math.round(Math.pow(i / 255, 1 / 2.2) * 255));
   const card = document.createElement('div');
   card.className = 'camfeed'; card.hidden = true;
   card.innerHTML = '<div class="cfH"><b id="cfName"></b><span class="cfTag">Simulated detections</span><button class="chip" id="cfX">Close</button></div><canvas id="cfC" width="512" height="288"></canvas><div class="cfB"><button class="chip" id="cfPrev">Previous</button><button class="chip" id="cfNext">Next</button><label><input type="checkbox" id="cfAuto" checked> Jump to new violations</label><span id="cfCount"></span></div>';
@@ -31,19 +32,21 @@
 
   function renderFeed() {
     const c = curCam; if (!c) return;
+    const linear = B.cinematic && B.cinematic.isOn(), tm0 = renderer.toneMapping, lut = linear ? GAMMA : IDENT;
+    rt.texture.encoding = linear ? T.LinearEncoding : renderer.outputEncoding; if (linear) renderer.toneMapping = T.NoToneMapping;
     const target = renderer.getRenderTarget(), labels = W.labels.visible, cones = Wt.coneGroup.visible, tags = A.tagsShown(), sh = renderer.shadowMap.needsUpdate;
     W.labels.visible = false; Wt.coneGroup.visible = false; Wt.rigGroup.visible = false; A.showTags(false); renderer.shadowMap.needsUpdate = false;
     renderer.setRenderTarget(rt); renderer.clear(); renderer.render(scene, c.cam);
     renderer.readRenderTargetPixels(rt, 0, 0, FW, FH, px);
-    renderer.setRenderTarget(target);
+    renderer.setRenderTarget(target); renderer.toneMapping = tm0;
     W.labels.visible = labels; Wt.coneGroup.visible = cones; Wt.rigGroup.visible = true; A.showTags(tags); renderer.shadowMap.needsUpdate = sh;
     // flip vertically, then a slightly desaturated CCTV grade
     const d = img.data;
     for (let y = 0; y < FH; y++) {
       const r0 = (FH - 1 - y) * FW * 4, w0 = y * FW * 4;
       for (let x = 0; x < FW; x++) {
-        const a = r0 + x * 4, b = w0 + x * 4, l = (px[a] * 0.3 + px[a + 1] * 0.59 + px[a + 2] * 0.11);
-        d[b] = l + (px[a] - l) * 0.62; d[b + 1] = l + (px[a + 1] - l) * 0.62; d[b + 2] = l + (px[a + 2] - l) * 0.62 + 4; d[b + 3] = 255;
+        const a = r0 + x * 4, b = w0 + x * 4, cr = lut[px[a]], cg = lut[px[a + 1]], cb = lut[px[a + 2]], l = cr * 0.3 + cg * 0.59 + cb * 0.11;
+        d[b] = l + (cr - l) * 0.62; d[b + 1] = l + (cg - l) * 0.62; d[b + 2] = l + (cb - l) * 0.62 + 4; d[b + 3] = 255;
       }
     }
     ctx.putImageData(img, 0, 0);

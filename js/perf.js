@@ -84,7 +84,7 @@
   // last step keeps full resolution but turns shadows off, which costs the GPU the most
   const LEVELS = [dpr, Math.min(dpr, 1.5), Math.min(dpr, 1.25), 1].filter((q, i, a) => i === 0 || q < a[i - 1]);
   const MAX = LEVELS.length;
-  let level = 0, frames = 0, acc = 0, cooldown = 3, goodFor = 0, shadows = true, full = false;
+  let level = 0, frames = 0, acc = 0, cooldown = 3, goodFor = 0, shadows = true, full = false, checks = 0, lastUp = -1e9, settled = false;
   const lowBox = () => document.getElementById('lyLow');
   function apply() {
     renderer.setPixelRatio(LEVELS[Math.min(level, MAX - 1)]);
@@ -107,10 +107,9 @@
     if ((cooldown -= 1.5) > 0) return;
     // only lower quality when our own rendering is the cause (not a browser frame cap such as battery saver)
     let work = 0;
-    if (fps < 45) { const gl = renderer.getContext(), t0 = performance.now(); renderer.render(scene, B.three.camera); gl.finish(); work = performance.now() - t0; }
-    B.perf.workMs = +work.toFixed(1);
-    if (fps < 45 && work > 12 && level < MAX) { level++; apply(); cooldown = 3; goodFor = 0; }
-    else if (fps > 57 && level > 0) { if ((goodFor += 1.5) >= 12) { level--; apply(); cooldown = 6; goodFor = 0; } }
+    if (fps < 45 && ++checks % 3 === 0) { const gl = renderer.getContext(), t0 = performance.now(); renderer.render(scene, B.three.camera); gl.finish(); work = performance.now() - t0; B.perf.workMs = +work.toFixed(1); } // the measurement is itself a full render, so not on every check
+    if (fps < 45 && work > 12 && level < MAX) { if (performance.now() - lastUp < 45000) settled = true; level++; apply(); cooldown = 3; goodFor = 0; } // stepping back down soon after stepping up: stay here for good
+    else if (fps > 57 && level > 0 && !settled) { if ((goodFor += 1.5) >= 12) { level--; apply(); cooldown = 6; goodFor = 0; lastUp = performance.now(); } }
     else goodFor = 0;
     B.perf.fps = Math.round(fps); B.perf.level = level;
   });

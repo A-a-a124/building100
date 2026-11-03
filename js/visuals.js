@@ -20,7 +20,7 @@
     fragmentShader: `uniform vec3 zen; uniform vec3 hor; uniform vec3 sunCol; uniform vec3 sunDir; uniform float tm; uniform float day; uniform float dust; uniform float gam; varying vec3 vD;
       float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
       float n(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y); }
-      float fbm(vec2 p){ float a=.5,s=0.; for(int k=0;k<5;k++){ s+=a*n(p); p=p*2.03+vec2(7.1,3.7); a*=.5; } return s; }
+      float fbm(vec2 p){ float a=.5,s=0.; for(int k=0;k<4;k++){ s+=a*n(p); p=p*2.03+vec2(7.1,3.7); a*=.5; } return s; }
       void main(){ vec3 d=normalize(vD); float y=max(d.y,0.);
         vec3 c=mix(hor,zen,pow(smoothstep(0.,.62,y),.62));
         float s=max(dot(d,sunDir),0.);
@@ -114,7 +114,7 @@
     return merge(parts);
   })();
   const spots = [];
-  for (let k = 0; k < 10; k++) { if (R() < 0.8) spots.push([-114.9 + k * 4.2, 57, Math.PI / 2 + (R() < 0.5 ? 0 : Math.PI)]); if (R() < 0.7) spots.push([-114.9 + k * 4.2, 81, Math.PI / 2 + (R() < 0.5 ? 0 : Math.PI)]); }
+  for (let k = 0; k < 10; k++) { if (k !== 6 && R() < 0.8) spots.push([-114.9 + k * 4.2, 57, Math.PI / 2 + (R() < 0.5 ? 0 : Math.PI)]); if (k !== 3 && k !== 4 && R() < 0.7) spots.push([-114.9 + k * 4.2, 81, Math.PI / 2 + (R() < 0.5 ? 0 : Math.PI)]); }
   const carCols = ['#f2f3f4', '#f2f3f4', '#c7ccd1', '#1e2226', '#7d8690', '#8c1f1f', '#23457d', '#d7cdb8'];
   const cars = new T.InstancedMesh(carGeo, new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.28, metalness: 0.55 }), spots.length);
   spots.forEach(([x, z, r], i) => { Q.setFromAxisAngle(Y, r); M.compose(V.set(x, 0, z), Q, SC.set(1, 1, 1)); cars.setMatrixAt(i, M); cars.setColorAt(i, C.set(carCols[Math.floor(R() * carCols.length)])); });
@@ -199,7 +199,7 @@
   })();
 
   // clear glass instead of a milky film
-  W.shell.traverse((o) => { if (o.isMesh && o.material.transparent && o.material.side === T.DoubleSide && o.material.opacity < 0.2) { o.material.opacity = 0.055; o.material.color.set('#8fb0c8'); o.material.roughness = 0.08; o.material.metalness = 0.75; } });
+  W.shell.traverse((o) => { if (o.isMesh && o.material.transparent && o.material.side === T.DoubleSide && o.material.opacity < 0.2) { o.material.opacity = 0.055; o.material.color.set('#8fb0c8'); o.material.roughness = 0.25; o.material.metalness = 0.6; } });
   const hallFloor = W.floor.material;
   hallFloor.color.multiplyScalar(0.8);
 
@@ -230,7 +230,7 @@
 
   // ---------- polished floor: a real mirror image of the hall, sampled with fresnel, while cinematic effects are on ----------
   const REF = { on: false, k: 0.55, skip: 0 };
-  const rt = new T.WebGLRenderTarget(1024, 576, { type: T.HalfFloatType, format: T.RGBAFormat, minFilter: T.LinearFilter, magFilter: T.LinearFilter, depthBuffer: true });
+  const rt = new T.WebGLRenderTarget(768, 432, { type: T.HalfFloatType, format: T.RGBAFormat, minFilter: T.LinearFilter, magFilter: T.LinearFilter, depthBuffer: true });
   rt.texture.encoding = T.LinearEncoding; rt.texture.generateMipmaps = false;
   const mirror = new T.PerspectiveCamera();
   const refUni = { tRefl: { value: rt.texture }, reflMat: { value: new T.Matrix4() }, reflK: { value: 0 } };
@@ -241,6 +241,7 @@
         vec2 ruv = vReflUv.xy / vReflUv.w;
         vec2 e = vec2(0.0016, 0.0028);
         vec3 rc = (texture2D(tRefl, ruv).rgb * 2.0 + texture2D(tRefl, ruv + vec2(e.x, 0.)).rgb + texture2D(tRefl, ruv - vec2(e.x, 0.)).rgb + texture2D(tRefl, ruv + vec2(0., e.y)).rgb + texture2D(tRefl, ruv - vec2(0., e.y)).rgb) / 6.0;
+        rc = min(max(rc, vec3(0.0)), vec3(6.0));
         float cs = clamp(dot(normalize(vNormal), normalize(vViewPosition)), 0.0, 1.0);
         float fres = 0.12 + 0.88 * pow(1.0 - cs, 3.2);
         gl_FragColor.rgb = mix(gl_FragColor.rgb, rc, reflK * fres);
@@ -259,12 +260,13 @@
     mirror.up.set(0, 1, 0).applyQuaternion(camera.quaternion); mirror.up.y = -mirror.up.y;
     mirror.lookAt(tgtV); mirror.updateMatrixWorld(true);
     refUni.reflMat.value.copy(bias).multiply(mirror.projectionMatrix).multiply(mirror.matrixWorldInverse);
+    site.visible = false; motes.visible = false; const shaftsOn = shafts.visible; shafts.visible = false;
     const labels = W.labels.visible, tm = renderer.toneMapping, sh = renderer.shadowMap.needsUpdate, target = renderer.getRenderTarget();
     W.labels.visible = false; renderer.toneMapping = T.NoToneMapping; renderer.shadowMap.needsUpdate = false; refUni.reflK.value = 0;
     const tagsWere = B.actors.tagsShown(); B.actors.showTags(false);
     renderer.setRenderTarget(rt); renderer.clear(); renderer.render(scene, mirror); renderer.setRenderTarget(target);
     B.actors.showTags(tagsWere);
-    W.labels.visible = labels; renderer.toneMapping = tm; renderer.shadowMap.needsUpdate = sh; refUni.reflK.value = REF.k;
+    W.labels.visible = labels; renderer.toneMapping = tm; renderer.shadowMap.needsUpdate = sh; refUni.reflK.value = REF.k; site.visible = true; shafts.visible = shaftsOn;
   }
 
   // ---------- sharper shadows covering the whole site in Full quality ----------
@@ -289,7 +291,7 @@
     const fps = fr / acc; fr = 0; acc = 0;
     if ((grace -= 2) > 0) return;
     if (!autoOn && fps > 56 && !box.checked && !(document.getElementById('lyLow') || {}).checked) { autoOn = true; box.checked = true; box.dispatchEvent(new Event('change')); grace = 8; }
-    else if (autoOn && fps < 34) { autoOn = false; auto = false; box.checked = false; box.dispatchEvent(new Event('change')); }
+    else if (autoOn && fps < 48) { autoOn = false; auto = false; box.checked = false; box.dispatchEvent(new Event('change')); }
   }
 
   // ---------- frame ----------
@@ -307,8 +309,8 @@
     if (motes.visible) { const a = moteGeo.attributes.position, sk = dt * 2; for (let k = 0; k < MOTES; k++) { const v = moteV[k]; a.array[k * 3] += v[0] * sk; a.array[k * 3 + 1] += v[1] * sk; a.array[k * 3 + 2] += v[2] * sk; if (a.array[k * 3 + 1] > 11) a.array[k * 3 + 1] = 0.4; if (a.array[k * 3 + 1] < 0.3) a.array[k * 3 + 1] = 10; } a.needsUpdate = true; }
     lampGlow.material.opacity = 1 - day;
     autoQuality(dt);
-    REF.on = !!(B.cinematic && B.cinematic.isOn()) && !CAPTURE && cy < 150;
-    if (REF.on) { if (++REF.skip % 2 === 0) renderMirror(); refUni.reflK.value = REF.k; } else refUni.reflK.value = 0;
+    REF.on = !!(B.cinematic && B.cinematic.isOn()) && !CAPTURE && cy < 60;
+    if (REF.on) { if (++REF.skip % 3 === 0) renderMirror(); refUni.reflK.value = REF.k; } else refUni.reflK.value = 0;
   });
   unCull();
   B.visuals = { sky: skyMat, paintSky, refl: REF, renderMirror, site, unCull };

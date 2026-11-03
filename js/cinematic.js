@@ -15,6 +15,7 @@
       rt.samples = 4;
       composer = new T.EffectComposer(renderer, rt);
       composer.addPass(new T.RenderPass(scene, camera));
+      composer.addPass(new T.ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }', fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); if (!(c.r >= 0.0) || !(c.g >= 0.0) || !(c.b >= 0.0)) c.rgb = vec3(0.0); c.rgb = min(c.rgb, vec3(24.0)); gl_FragColor = c; }' }));
       bloom = new T.UnrealBloomPass(new T.Vector2(size.x, size.y), 0.16, 0.4, 1.0);
       composer.addPass(bloom);
       composer.addPass(new T.ShaderPass(T.ACESFilmicToneMappingShader));
@@ -32,7 +33,7 @@
     const size = renderer.getDrawingBufferSize(new T.Vector2());
     if (composer.renderTarget1.width !== size.x || composer.renderTarget1.height !== size.y) composer.setSize(size.x / renderer.getPixelRatio(), size.y / renderer.getPixelRatio()), composer.setPixelRatio(renderer.getPixelRatio());
     const tm = renderer.toneMapping; renderer.toneMapping = T.NoToneMapping;
-    composer.passes[2].uniforms.exposure.value = renderer.toneMappingExposure;
+    composer.passes[3].uniforms.exposure.value = renderer.toneMappingExposure;
     composer.render();
     renderer.toneMapping = tm;
     inside = false;

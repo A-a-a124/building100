@@ -102,6 +102,49 @@
     return g;
   }
 
-  W.makeForklift = makeForklift;
-  W.makeTruck = makeTruck;
+  // parts that never move on their own become one mesh per material inside each group: far fewer draw calls
+  W.mergeStatic = function (root, keep) {
+    const parents = [], v = new T.Vector3(), nm = new T.Matrix3();
+    root.traverse((o) => { if (o.children.length > 1) parents.push(o); });
+    parents.forEach((parent) => {
+      const buckets = new Map();
+      parent.children.forEach((m) => {
+        if (!m.isMesh || m.isInstancedMesh || m.children.length || !m.visible || Array.isArray(m.material) || (keep && keep.has(m)) || !m.geometry.attributes.normal) return;
+        const key = m.material.uuid + m.castShadow + m.receiveShadow;
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key).push(m);
+      });
+      buckets.forEach((list) => {
+        if (list.length < 2) return;
+        let nv = 0, ni = 0;
+        list.forEach((m) => { const g = m.geometry; nv += g.attributes.position.count; ni += g.index ? g.index.count : g.attributes.position.count; });
+        const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), uv = new Float32Array(nv * 2), idx = new Uint32Array(ni);
+        let ov = 0, oi = 0;
+        list.forEach((m) => {
+          const g = m.geometry, p = g.attributes.position, n = g.attributes.normal, u = g.attributes.uv;
+          m.updateMatrix(); nm.getNormalMatrix(m.matrix);
+          for (let i = 0; i < p.count; i++) {
+            v.fromBufferAttribute(p, i).applyMatrix4(m.matrix); pos[(ov + i) * 3] = v.x; pos[(ov + i) * 3 + 1] = v.y; pos[(ov + i) * 3 + 2] = v.z;
+            v.fromBufferAttribute(n, i).applyMatrix3(nm).normalize(); nor[(ov + i) * 3] = v.x; nor[(ov + i) * 3 + 1] = v.y; nor[(ov + i) * 3 + 2] = v.z;
+            if (u) { uv[(ov + i) * 2] = u.getX(i); uv[(ov + i) * 2 + 1] = u.getY(i); }
+          }
+          if (g.index) for (let i = 0; i < g.index.count; i++) idx[oi++] = g.index.getX(i) + ov;
+          else for (let i = 0; i < p.count; i++) idx[oi++] = i + ov;
+          ov += p.count;
+          parent.remove(m);
+        });
+        const geo = new T.BufferGeometry();
+        geo.setAttribute('position', new T.BufferAttribute(pos, 3));
+        geo.setAttribute('normal', new T.BufferAttribute(nor, 3));
+        geo.setAttribute('uv', new T.BufferAttribute(uv, 2));
+        geo.setIndex(new T.BufferAttribute(idx, 1));
+        const merged = new T.Mesh(geo, list[0].material);
+        merged.castShadow = list[0].castShadow; merged.receiveShadow = list[0].receiveShadow;
+        parent.add(merged);
+      });
+    });
+    return root;
+  };
+  W.makeForklift = (n) => W.mergeStatic(makeForklift(n));
+  W.makeTruck = (dir) => W.mergeStatic(makeTruck(dir));
 })();

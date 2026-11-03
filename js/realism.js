@@ -193,7 +193,7 @@
   });
 
   // ---------- forklift operators ----------
-  const vest = W.mat('#f26a1b', { roughness: 0.8 }), skin = W.mat('#a8754f', { roughness: 0.7 }), helmet = W.mat('#f4f4f0', { roughness: 0.4 });
+  const vest = W.mat(B.actors.CLOTH.beige, { roughness: 0.8 }), skin = W.mat('#a8754f', { roughness: 0.7 }), helmet = W.mat('#f4f4f0', { roughness: 0.4 });
   function crew() {
     S.forklifts.forEach((f) => {
       if (f.mesh.userData.op) return;
