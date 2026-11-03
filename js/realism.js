@@ -1,4 +1,4 @@
-/* Building 100 - realism pass: filmic tone mapping, image-based lighting, procedural surface textures, sky, rack bracing, floor markings, operators */
+/* Building 19 - realism pass: filmic tone mapping, image-based lighting, procedural surface textures, sky, rack bracing, floor markings, operators */
 (function () {
   const B = window.B100, W = B.world, S = B.sim, T = THREE;
   const { renderer, scene, sun, hemi } = B.three;
@@ -9,7 +9,7 @@
 
   // ---------- renderer ----------
   renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.92;
+  renderer.toneMappingExposure = 1.02;
   sun.shadow.normalBias = 0.02;
   // the sun moves slowly: redraw the shadow map every few frames instead of every frame
   renderer.shadowMap.autoUpdate = false;
@@ -230,7 +230,7 @@
     t = 0;
     crew(); sweep(); paintSky();
     const k = Math.max(0.12, Math.min(1, hemi.intensity / baseHemi));
-    if (Math.abs(k - lastK) > 0.02) { lastK = k; std.forEach((m) => (m.envMapIntensity = 0.55 * k)); }
+    if (Math.abs(k - lastK) > 0.02) { lastK = k; std.forEach((m) => (m.envMapIntensity = 0.42 * k)); }
   });
   crew(); sweep(); paintSky();
 
@@ -239,9 +239,9 @@
   hemi.groundColor.set('#8a7350');
   B.hooks.frame.push(() => {
     const k = Math.max(0, Math.min(1, (hemi.intensity - 0.2) / 0.52)); // 0 at night, 1 at full day (set by the environment module)
-    sun.intensity *= 1 + 0.25 * k;
-    hemi.intensity *= 1 - 0.22 * k;
-    if (scene.fog && !(B.weather && B.weather.state.dust)) { scene.fog.near = 340; scene.fog.far = 980; }
+    sun.intensity *= 1 + 0.72 * k;
+    hemi.intensity *= 1 - 0.5 * k;
+    if (scene.fog && !(B.weather && B.weather.state.dust)) { scene.fog.near = 640; scene.fog.far = 1180; }
     const h = ((B.sim.st.t / 3600) % 24 + 24) % 24, low = Math.min(1, Math.abs(h - 12.5) / 6);
     sun.color.copy(noon).lerp(warm, low);
   });

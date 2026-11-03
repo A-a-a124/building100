@@ -1,4 +1,4 @@
-/* Building 100 - cross-docking: part of the inbound pallets go straight to an outbound lane, skipping storage */
+/* Building 19 - cross-docking: part of the inbound pallets go straight to an outbound lane, skipping storage */
 (function () {
   const B = window.B100, S = B.sim, W = B.world;
   const fmt = (n, d) => B.tools.fmt(n, d);

@@ -1,4 +1,4 @@
-/* Building 100 - fast analytical model: compare two scenarios side by side, export the report, forecast when racks fill */
+/* Building 19 - fast analytical model: compare two scenarios side by side, export the report, forecast when racks fill */
 (function () {
   const B = window.B100, S = B.sim, L = B.LANES, W = B.world;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -105,16 +105,16 @@
   }
   function exportCsv() {
     const { A: a, B: b, ra, rb } = last;
-    const lines = ['Building 100 scenario comparison,' + last.at.toISOString(), 'Setting,Scenario A,Scenario B',
+    const lines = ['Building 19 scenario comparison,' + last.at.toISOString(), 'Setting,Scenario A,Scenario B',
       'Forklifts,' + a.forklifts + ',' + b.forklifts, 'Workload,' + a.rate + ',' + b.rate, 'Slotting,' + a.slotting + ',' + b.slotting, 'Shift hours,' + a.hours + ',' + b.hours, '',
       'Measure,Scenario A,Scenario B,Change %'].concat(ROWS.map(([n, k, u, d]) => { const x = val(ra, k), y = val(rb, k); return n + (u ? ' (' + u + ')' : '') + ',' + x.toFixed(2) + ',' + y.toFixed(2) + ',' + (x ? (((y - x) / x) * 100).toFixed(1) : '0'); }));
-    B.tools.download('building100-scenarios.csv', lines.join('\n'));
+    B.tools.download('building19-scenarios.csv', lines.join('\n'));
   }
   function printReport() {
     let r = document.getElementById('printReport');
     if (!r) { r = document.createElement('div'); r.id = 'printReport'; r.style.display = 'none'; document.body.appendChild(r); }
     const { A: a, B: b } = last;
-    r.innerHTML = '<h1>Building 100 &middot; Scenario comparison</h1><p>' + last.at.toLocaleString('en-GB') + '</p><p>A: ' + a.forklifts + ' forklifts, ' + a.rate + ' workload, ' + a.slotting + ' slotting, ' + a.hours + ' h. B: ' + b.forklifts + ' forklifts, ' + b.rate + ' workload, ' + b.slotting + ' slotting, ' + b.hours + ' h.</p>' + document.querySelector('#cmpOut table').outerHTML;
+    r.innerHTML = '<h1>Building 19 &middot; Scenario comparison</h1><p>' + last.at.toLocaleString('en-GB') + '</p><p>A: ' + a.forklifts + ' forklifts, ' + a.rate + ' workload, ' + a.slotting + ' slotting, ' + a.hours + ' h. B: ' + b.forklifts + ' forklifts, ' + b.rate + ' workload, ' + b.slotting + ' slotting, ' + b.hours + ' h.</p>' + document.querySelector('#cmpOut table').outerHTML;
     r.style.display = 'block';
     try { window.print(); } catch (e) {}
     setTimeout(() => (r.style.display = 'none'), 500);

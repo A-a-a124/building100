@@ -1,4 +1,4 @@
-/* Building 100 - shift handover: at every shift change, a summary for the incoming shift of what was done and what is still open */
+/* Building 19 - shift handover: at every shift change, a summary for the incoming shift of what was done and what is still open */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d), esc = (t) => P.esc(String(t));
@@ -79,7 +79,7 @@
       <div class="btnrow"><button class="btn primary" id="hoNow">Show the handover now</button><button class="btn" id="hoCsv">Export handovers (CSV)</button></div>
       ${history.map((h) => `<div class="card ho"><b>${esc(h.from)} to ${esc(h.to)} · ${h.start} to ${h.end}</b>${html(h)}</div>`).join('')}`;
     el.querySelector('#hoNow').addEventListener('click', () => { const h = build('next shift'); show(h); });
-    el.querySelector('#hoCsv').addEventListener('click', () => B.tools.download('building100-handovers.csv', ['From,To,Start,End,Put away,Shipped,Orders,Avg cycle min,Near misses,Breakdowns,Open tasks,Waiting orders,Note']
+    el.querySelector('#hoCsv').addEventListener('click', () => B.tools.download('building19-handovers.csv', ['From,To,Start,End,Put away,Shipped,Orders,Avg cycle min,Near misses,Breakdowns,Open tasks,Waiting orders,Note']
       .concat(history.map((h) => [h.from, h.to, h.start, h.end, h.done.received, h.done.shipped, h.done.orders, h.done.cycle == null ? '' : h.done.cycle.toFixed(1), h.safety.near, h.safety.breakdowns, h.open.tasks, h.open.pending, '"' + h.note.replace(/"/g, '""') + '"'].join(','))).join('\n')));
   }
   B.tools.add({ id: 'handover', label: 'Handover', render });

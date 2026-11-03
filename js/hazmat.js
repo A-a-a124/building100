@@ -1,4 +1,4 @@
-/* Building 100 - hazardous materials rules: flags incompatible materials stored too close together in the cage */
+/* Building 19 - hazardous materials rules: flags incompatible materials stored too close together in the cage */
 (function () {
   const B = window.B100, W = B.world, T = THREE, P = B.panel;
   const zn = B.zoneById('HAZ');

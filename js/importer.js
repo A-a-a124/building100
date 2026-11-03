@@ -1,4 +1,4 @@
-/* Building 100 - import real stock from an SAP / WMS export (CSV or Excel) and place it in the racks */
+/* Building 19 - import real stock from an SAP / WMS export (CSV or Excel) and place it in the racks */
 (function () {
   const B = window.B100, W = B.world, S = B.sim, P = B.panel;
   const KEY = 'b100.import';
@@ -154,7 +154,7 @@
     ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
     ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
     drop.addEventListener('drop', (e) => e.dataTransfer.files[0] && handle(e.dataTransfer.files[0]));
-    el.querySelector('#tpl').addEventListener('click', () => B.tools.download('building100-stock-template.csv', TEMPLATE));
+    el.querySelector('#tpl').addEventListener('click', () => B.tools.download('building19-stock-template.csv', TEMPLATE));
     el.querySelector('#restore').addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
   }
 

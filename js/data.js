@@ -1,4 +1,4 @@
-/* Building 100 - warehouse layout and inventory (illustrative sample data) */
+/* Building 19 - warehouse layout and inventory (illustrative sample data) */
 (function () {
   const B = (window.B100 = window.B100 || {});
 

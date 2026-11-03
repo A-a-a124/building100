@@ -1,4 +1,4 @@
-/* Building 100 - dock detail: roller doors open when a truck backs on and close after it leaves; the dock leveller drops into the trailer; forklift trails */
+/* Building 19 - dock detail: roller doors open when a truck backs on and close after it leaves; the dock leveller drops into the trailer; forklift trails */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE;
   const { scene } = B.three;

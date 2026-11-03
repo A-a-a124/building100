@@ -1,4 +1,4 @@
-/* Building 100 - forklift batteries: drain while working, drive to the charger below 20%, charge back to 90% */
+/* Building 19 - forklift batteries: drain while working, drive to the charger below 20%, charge back to 90% */
 (function () {
   const B = window.B100, S = B.sim, T = THREE;
   const R = B.rng(515);

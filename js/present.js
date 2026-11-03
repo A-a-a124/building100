@@ -1,4 +1,4 @@
-/* Building 100 - presentation mode: a three-minute guided show for management, with captions that quote the live numbers */
+/* Building 19 - presentation mode: a three-minute guided show for management, with captions that quote the live numbers */
 (function () {
   const B = window.B100, S = B.sim, W = B.world;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -41,20 +41,21 @@
 
   // each scene: where the camera goes, a title, and a line built from the model at that moment
   const SCENES = [
-    { view: 'overview', title: 'Building 100 · a live digital twin', line: () => 'The whole materials warehouse in 3D: ' + fmt(B.SLOTS.length) + ' pallet positions, ' + S.forklifts.length + ' forklifts, 2 drones and the open yard, running a live simulation.' },
+    { view: 'overview', title: 'Building 19 · a live digital twin', line: () => 'The whole materials warehouse in 3D: ' + fmt(B.SLOTS.length) + ' pallet positions, ' + S.forklifts.length + ' forklifts, 2 drones and the open yard, running a live simulation.' },
     { view: 'overview', title: 'How a twin works', enter: () => B.howItWorks.open(), leave: () => B.howItWorks.close(), line: () => 'Events on the floor reach sensors and systems, the twin mirrors them live, and people get answers: ' + B.sensors.count() + ' sensors, ' + B.sensors.perMinute() + ' readings a minute in this demo.' },
     { view: 'rcv', title: 'Trucks arrive on booked slots', line: () => { const c = B.carriers.recs.filter((r) => r.docked != null), on = c.filter((r) => r.gate - r.appt <= 300).length; return c.length ? on + ' of ' + c.length + ' trucks so far arrived on time. Late carriers and gate waiting are tracked per company.' : 'Every truck has a carrier and a booked slot; late arrivals and waiting at the gate are tracked per company.'; } },
     { view: 'rack', title: 'Every pallet is known', line: () => { const st = B.stock.compute(); return 'Stock worth ' + sar(st.total) + '. ' + fmt(st.frozenPallets) + ' pallets have not moved for a year and cost ' + sar(st.holdFrozen) + ' a year to keep.'; } },
     { view: 'rack', title: 'Your data goes in, the twin updates', enter: loadDemo, leave: restore, line: () => 'A stock export from SAP just loaded: ' + fmt(B.importInfo.rows) + ' lines placed by bin code. Stock value ' + sar(before.total) + ' → ' + sar(after.total) + ', frozen pallets ' + fmt(before.frozenPallets) + ' → ' + fmt(after.frozenPallets) + '. Red pallets are the oldest stock.' },
     { view: 'aisle', title: 'Drones count the high shelves', line: () => 'About ' + fmt(B.cycle.plan().due.length) + ' locations are counted every week instead of one yearly stock-take. Drone D1 flies the top levels.' },
     { view: 'team', title: 'People and forklifts share the floor', line: () => 'Forklifts stopped or gave way ' + fmt(S.st.yields || 0) + ' times. Every near miss is logged with its place, so the risky spots show up.' },
+    { view: 'overview', title: 'Cameras watch the rules', enter: () => { B.watch.setCams(true); B.watch.openCam(B.watch.CAMS[11]); }, leave: () => { B.watch.setCams(false); B.watch.closeCam(); }, line: () => B.watch.CAMS.length + ' cameras check every position against the walkways, the hazmat cage and the forklifts. ' + fmt(B.watch.events.length) + ' simulated detections so far, each one with evidence one click away.' },
     { view: 'top', title: 'Where the floor is busy', line: () => 'The congestion heatmap shows where forklifts and people spend their time: the base for safer walkways and better slotting.', enter: () => heat(true), leave: () => heat(false) },
     { view: 'haz', title: 'Hazmat rules checked automatically', line: () => { const v = B.hazmat.violations().length; return v ? v + ' storage rule breaches found in the cage, each with a one-click fix.' : 'The cage passes every segregation rule.'; } },
     { view: 'yard', title: 'The yard, the weather and the drones', line: () => 'Dust storms ground the yard drone and slow the trucks; the summer midday work ban is built in.' },
     { view: 'dsp', title: 'Orders leave on time', line: () => { const k = S.kpis(); return k.cycle ? 'Average order cycle ' + fmt(k.cycle, 0) + ' minutes from order to truck, with ' + Math.round(k.util * 100) + '% forklift utilisation.' : 'Issue orders are picked, staged and loaded through four doors on the south side.'; } },
     { view: 'overview', title: 'It sees what comes next', enter: () => { B.predict.ghost.visible = true; }, leave: () => { B.predict.ghost.visible = false; }, line: () => { const ev = B.predict.events(B.predict.forecast()), e = ev.find((q) => q.level === 'warn' || q.level === 'bad') || ev.find((q) => q.level === 'info') || ev[0]; return 'The twin just ran the next 8 hours from this exact moment: ' + e.text + '.'; } },
     { view: 'overview', title: 'What the improvements are worth', line: () => { const ba = B.beforeAfter.compare(), r = B.roi.evaluate().filter((q) => q.payback < Infinity && q.id !== 'custom').sort((a, b) => a.payback - b.payback)[0]; return 'Picking time ' + fmt(ba[1].before, 1) + ' → ' + fmt(ba[1].after, 1) + ' min per order. Best investment: ' + (r ? r.name.toLowerCase() + ', 3-year net ' + sar(r.three) : 'see the ROI tab') + '.'; } },
-    { cam: [[-260, 150, 300], [20, 0, 0]], title: 'From idea to a working model', line: () => 'Building 100 digital twin · Designed by Abdullah Aladhyani' },
+    { cam: [[-260, 150, 300], [20, 0, 0]], title: 'From idea to a working model', line: () => 'Building 19 digital twin · Designed by Abdullah Aladhyani' },
   ];
   const DUR = 15;
   let i = -1, t = 0, paused = false, saved = null;
@@ -78,7 +79,7 @@
     const s = SCENES[i];
     if (s.enter) s.enter();
     if (s.view) B.ui.setView(s.view); else B.ui.flyTo(s.cam[0], s.cam[1], 2.5);
-    $('pStep').textContent = 'BUILDING 100 · ' + (i + 1) + ' / ' + SCENES.length;
+    $('pStep').textContent = 'BUILDING 19 · ' + (i + 1) + ' / ' + SCENES.length;
     $('pTitle').textContent = s.title;
     $('pLine').textContent = s.line();
     $('pNext').textContent = i === SCENES.length - 1 ? 'Finish' : 'Next';

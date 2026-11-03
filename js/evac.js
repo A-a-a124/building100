@@ -1,4 +1,4 @@
-/* Building 100 - emergency drill: fire scenario, escape routes, assembly points and evacuation time */
+/* Building 19 - emergency drill: fire scenario, escape routes, assembly points and evacuation time */
 (function () {
   const B = window.B100, W = B.world, S = B.sim, T = THREE, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -204,7 +204,7 @@
         <div class="btnrow"><button class="btn" id="drCsv">Export drill history (CSV)</button><button class="btn" id="drClear">Clear the history</button></div>` : ''}`;
     if (history.length) {
       histChart(el.querySelector('#drHist'));
-      el.querySelector('#drCsv').addEventListener('click', () => B.tools.download('building100-drills.csv', ['Date,Scenario,Building clear (s),All at assembly points (s),Last out'].concat(history.map((h) => [new Date(h.date).toISOString().slice(0, 16).replace('T', ' '), '"' + h.fire + '"', Math.round(h.t), Math.round(h.all), '"' + h.lastName + '"'].join(','))).join('\n')));
+      el.querySelector('#drCsv').addEventListener('click', () => B.tools.download('building19-drills.csv', ['Date,Scenario,Building clear (s),All at assembly points (s),Last out'].concat(history.map((h) => [new Date(h.date).toISOString().slice(0, 16).replace('T', ' '), '"' + h.fire + '"', Math.round(h.t), Math.round(h.all), '"' + h.lastName + '"'].join(','))).join('\n')));
       el.querySelector('#drClear').addEventListener('click', () => { history = []; last = null; saveHistory(); render(el); });
     }
     el.querySelector('#drSc').addEventListener('change', (e) => { scenario = e.target.value; render(el); });

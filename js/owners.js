@@ -1,4 +1,4 @@
-/* Building 100 - stock owners: the warehouse stores for Aramco and for other companies; space, stock and storage charges per owner, plus the sample-data badge */
+/* Building 19 - stock owners: the warehouse stores for Aramco and for other companies; space, stock and storage charges per owner, plus the sample-data badge */
 (function () {
   const B = window.B100, W = B.world, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -43,7 +43,7 @@
 
   function render(el) {
     const rows = summary(), mode = B.stock.mode() === 'owner';
-    el.innerHTML = `<h4>Stock owners</h4><p>Building 100 stores for Aramco and for other companies. Each company has its own block of rack space; here is how full each block is, what it holds and the monthly storage charge for the outside companies.</p>
+    el.innerHTML = `<h4>Stock owners</h4><p>Building 19 stores for Aramco and for other companies. Each company has its own block of rack space; here is how full each block is, what it holds and the monthly storage charge for the outside companies.</p>
       <table><thead><tr><th>Owner</th><th class="num">Positions</th><th class="num">Used</th><th class="num">Stock value</th><th class="num">Charge / month</th></tr></thead><tbody>
       ${rows.map((r) => '<tr data-o="' + P.esc(r.id) + '" style="cursor:pointer' + (only === r.id ? ';font-weight:700' : '') + '"><td><i class="dot" style="background:' + colour(r.id) + '"></i>' + P.esc(r.id) + (r.frozen ? '<br><small>' + r.frozen + ' frozen pallets</small>' : '') + '</td><td class="num">' + fmt(r.slots) + '</td><td class="num ' + (r.used / r.slots > 0.92 ? 'bad' : '') + '">' + fmt((r.used / r.slots) * 100, 0) + '%</td><td class="num">' + B.stock.sar(r.value) + '</td><td class="num">' + (r.id === 'Aramco' ? '-' : B.stock.sar(r.used * fee.perPalletDay * 30)) + '</td></tr>').join('')}</tbody></table>
       <label class="f">Storage charge, SAR per pallet a day<input type="number" id="owFee" value="${fee.perPalletDay}" min="0" step="0.5"></label>
@@ -54,7 +54,7 @@
     el.querySelector('#owCol').addEventListener('click', () => { only = ''; B.stock.setColourMode(mode ? '' : 'owner'); render(el); });
     const all = el.querySelector('#owAll'); if (all) all.addEventListener('click', () => { only = ''; B.stock.setColourMode('owner'); render(el); });
     el.querySelector('#owFee').addEventListener('change', (e) => { fee.perPalletDay = Math.max(0, +e.target.value || 0); render(el); });
-    el.querySelector('#owCsv').addEventListener('click', () => B.tools.download('building100-owner-charges.csv', ['Owner,Positions,Used,Utilisation %,Stock value SAR,Frozen pallets,Charge per month SAR']
+    el.querySelector('#owCsv').addEventListener('click', () => B.tools.download('building19-owner-charges.csv', ['Owner,Positions,Used,Utilisation %,Stock value SAR,Frozen pallets,Charge per month SAR']
       .concat(rows.map((r) => ['"' + r.id + '"', r.slots, r.used, Math.round((r.used / r.slots) * 100), Math.round(r.value), r.frozen, r.id === 'Aramco' ? 0 : r.used * fee.perPalletDay * 30].join(','))).join('\n')));
   }
   B.tools.add({ id: 'owners', label: 'Owners', render });

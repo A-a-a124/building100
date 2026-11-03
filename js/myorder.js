@@ -1,4 +1,4 @@
-/* Building 100 - place your own order and watch it picked and shipped; move a pallet by hand */
+/* Building 19 - place your own order and watch it picked and shipped; move a pallet by hand */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

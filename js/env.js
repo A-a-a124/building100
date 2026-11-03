@@ -1,4 +1,4 @@
-/* Building 100 - environment: day/night from the simulation clock, shifts and breaks, visual polish, low-quality mode */
+/* Building 19 - environment: day/night from the simulation clock, shifts and breaks, visual polish, low-quality mode */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE;
   const { renderer, scene, sun, hemi } = B.three;

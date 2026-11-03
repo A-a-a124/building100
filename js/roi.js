@@ -1,4 +1,4 @@
-/* Building 100 - return on investment: cost, yearly saving and payback for each improvement, from the model's own numbers */
+/* Building 19 - return on investment: cost, yearly saving and payback for each improvement, from the model's own numbers */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d), sar = (n) => B.stock.sar(Math.abs(n));
@@ -65,7 +65,7 @@
     chart(el.querySelector('#roiChart'), ranked);
     el.querySelectorAll('[data-q]').forEach((i) => i.addEventListener('change', () => { vals[i.dataset.q][i.dataset.k] = +i.value || 0; render(el); }));
     el.querySelectorAll('[data-a]').forEach((i) => i.addEventListener('change', () => { A[i.dataset.a] = +i.value || 0; render(el); }));
-    el.querySelector('#roiCsv').addEventListener('click', () => B.tools.download('building100-roi.csv', ['Improvement,One-off SAR,Running SAR per year,Saving SAR per year,Payback months,3-year net SAR,Basis']
+    el.querySelector('#roiCsv').addEventListener('click', () => B.tools.download('building19-roi.csv', ['Improvement,One-off SAR,Running SAR per year,Saving SAR per year,Payback months,3-year net SAR,Basis']
       .concat(ranked.map((r) => ['"' + r.name + '"', Math.round(r.once), Math.round(r.run), Math.round(r.gain), r.payback === Infinity ? 'never' : r.payback.toFixed(1), Math.round(r.three), '"' + r.why + '"'].join(','))).join('\n')));
   }
   function chart(c, ranked) {

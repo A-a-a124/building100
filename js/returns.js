@@ -1,4 +1,4 @@
-/* Building 100 - returns: material sent back from sites is inspected in QC, then put back in stock, repaired or scrapped */
+/* Building 19 - returns: material sent back from sites is inspected in QC, then put back in stock, repaired or scrapped */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

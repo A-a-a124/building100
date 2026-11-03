@@ -1,4 +1,4 @@
-/* Building 100 - pick accuracy: a few picks take the wrong material or quantity; the dispatch check catches most of them */
+/* Building 19 - pick accuracy: a few picks take the wrong material or quantity; the dispatch check catches most of them */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

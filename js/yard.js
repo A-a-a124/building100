@@ -1,4 +1,4 @@
-/* Building 100 - open storage yard beside the warehouse */
+/* Building 19 - open storage yard beside the warehouse */
 (function () {
   const B = window.B100;
   const T = THREE;

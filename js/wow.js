@@ -1,4 +1,4 @@
-/* Building 100 - visual polish: opening fly-in, the plant on the horizon with a burning flare, lamp light at night, forklift blue safety spots */
+/* Building 19 - visual polish: opening fly-in, the plant on the horizon with a burning flare, lamp light at night, forklift blue safety spots */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE;
   const { scene, hemi, camera, controls } = B.three;

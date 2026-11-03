@@ -1,4 +1,4 @@
-/* Building 100 - side panel: search, details and zones */
+/* Building 19 - side panel: search, details and zones */
 (function () {
   const B = window.B100;
   const P = (B.panel = {});
@@ -96,9 +96,9 @@
     const rows = drone
       ? '<dt>Battery</dt><dd>' + Math.round(a.battery) + '%</dd><dt>' + (a.indoor ? 'Pallets counted' : 'Items surveyed') + '</dt><dd>' + fmt(Math.floor(a.scans)) + ' this shift</dd><dt>Altitude</dt><dd>' + a.y.toFixed(1) + ' m</dd>'
       : (a.trips != null ? '<dt>Cartons moved</dt><dd>' + a.trips + ' this shift</dd>' : '') + '<dt>Location</dt><dd>' + esc(nearestZone(a)) + '</dd>';
-    $('details').innerHTML = '<h2>' + (drone ? 'Drone details' : 'Team member') + '</h2><div class="card"><div class="kicker">' + esc(a.role) + '</div><h3>' + esc(a.name) + '</h3>' +
-      '<div class="chips"><span class="pill ' + (/Charging|Working|Watching|Sipping/.test(a.status) ? 'ok' : 'warn') + '"><i></i>' + esc(a.status) + '</span></div>' +
-      '<p>' + esc(a.about) + '</p><dl class="kv">' + rows + '</dl><button class="btn" data-follow-actor="' + a.id + '">Follow with camera</button></div>';
+    $('details').innerHTML = '<h2>' + (drone ? 'Drone details' : 'Team member') + '</h2><div class="card">' + (a.role ? '<div class="kicker">' + esc(a.role) + '</div>' : '') + '<h3>' + esc(a.name) + '</h3>' +
+      '<div class="chips"><span class="pill ' + (/Charging|Working|Observing|rounds|Checking/.test(a.status) ? 'ok' : 'warn') + '"><i></i>' + esc(a.status) + '</span></div>' +
+      (a.about ? '<p>' + esc(a.about) + '</p>' : '') + '<dl class="kv">' + rows + '</dl><button class="btn" data-follow-actor="' + a.id + '">Follow with camera</button></div>';
   };
   function nearestZone(a) {
     const z = B.ZONES.find((q) => a.x >= q.x[0] - 1 && a.x <= q.x[1] + 1 && a.z >= q.z[0] - 1 && a.z <= q.z[1] + 1);
@@ -107,7 +107,7 @@
   P.renderTeam = function () {
     $('team').innerHTML = B.actors.list.filter((a) => !a.anon).map((a) =>
       '<button class="zbtn" data-actor="' + a.id + '"><i style="background:' + (a.kind === 'drone' ? '#58d0ff' : '#f2b31b') + '"></i><span>' + esc(a.name) + '</span><small>' + esc(a.role) + '</small></button>').join('') +
-      '<p class="empty">Plus 3 warehouse workers carrying light cartons.</p>';
+      '<p class="empty">Plus 3 warehouse workers.</p>';
   };
 
   P.renderZones = function () {

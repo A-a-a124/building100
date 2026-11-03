@@ -1,4 +1,4 @@
-/* Building 100 - change log: who moved what, where and when, for audits and stock counts */
+/* Building 19 - change log: who moved what, where and when, for audits and stock counts */
 (function () {
   const B = window.B100, W = B.world, S = B.sim, P = B.panel;
   const log = [];
@@ -77,7 +77,7 @@
     el.querySelectorAll('[data-code]').forEach((tr) => tr.addEventListener('click', () => { const s = B.SLOTS.find((q) => q.code === tr.dataset.code); if (s) B.ui.focusSlot(s); }));
     el.querySelector('#lgCsv').addEventListener('click', () => {
       const esc = (v) => '"' + String(v).replace(/"/g, '""') + '"';
-      B.tools.download('building100-change-log.csv', ['Date,Sim time,Action,Location,Material no,Material,Quantity,By,Reference'].concat(log.map((r) => [r.date, r.sim, r.action, r.code, r.mat, r.name, r.qty, r.by, r.ref].map(esc).join(','))).join('\n'));
+      B.tools.download('building19-change-log.csv', ['Date,Sim time,Action,Location,Material no,Material,Quantity,By,Reference'].concat(log.map((r) => [r.date, r.sim, r.action, r.code, r.mat, r.name, r.qty, r.by, r.ref].map(esc).join(','))).join('\n'));
     });
   }
   const css = document.createElement('style');

@@ -1,4 +1,4 @@
-/* Building 100 - drive a forklift yourself: chase camera, W/S to drive, A/D to steer, Q/E for the forks, Space to pick up or set down */
+/* Building 19 - drive a forklift yourself: chase camera, W/S to drive, A/D to steer, Q/E for the forks, Space to pick up or set down */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE;
   const { camera, controls, stage } = B.three;

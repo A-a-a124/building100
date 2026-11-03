@@ -1,4 +1,4 @@
-/* Building 100 - training mode: six timed challenges for a new team member, with a score */
+/* Building 19 - training mode: six timed challenges for a new team member, with a score */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const { camera } = B.three;
@@ -58,7 +58,7 @@
 
   function render(el) {
     const best = +(store.get('b100.trainBest') || 0), total = results.reduce((n, r) => n + r.points, 0);
-    el.innerHTML = `<h4>Training mode</h4><p>Six short challenges that teach a new team member how to find things in Building 100: searching, location codes, reading the racks, hazmat rules, walking the floor and driving. Faster answers score more; a hint costs 15 points.</p>
+    el.innerHTML = `<h4>Training mode</h4><p>Six short challenges that teach a new team member how to find things in Building 19: searching, location codes, reading the racks, hazmat rules, walking the floor and driving. Faster answers score more; a hint costs 15 points.</p>
       <div class="row2"><div class="stat"><b>${results.length ? total : '-'}</b><small>last score (out of ${CH.length * 100})</small></div><div class="stat"><b>${best || '-'}</b><small>best score in this browser</small></div></div>
       <div class="btnrow"><button class="btn primary" id="trGo">Start training</button></div>
       <ol style="margin:0;padding-inline-start:18px;font-size:13px;display:grid;gap:4px">${CH.map((c) => '<li>' + c.title + '</li>').join('')}</ol>

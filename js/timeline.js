@@ -1,4 +1,4 @@
-/* Building 100 - time machine: the twin records itself, so you can scrub back to any moment of the last hours and see what led to it */
+/* Building 19 - time machine: the twin records itself, so you can scrub back to any moment of the last hours and see what led to it */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE;
   const STEP = 5, MAX = 2880; // a sample every 5 simulated seconds, up to 4 hours

@@ -1,4 +1,4 @@
-/* Building 100 - "About this model": every assumption and where each number comes from, read live from the modules */
+/* Building 19 - "About this model": every assumption and where each number comes from, read live from the modules */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -22,6 +22,12 @@
         ['Service levels', 'A 98%, B 95%, C 90%, critical spares 99% (used by the demand forecast)', 'ind', ''],
         ['Demand history', '13 weeks per material, generated from the stock on hand', real ? 'yours' : 'sample', 'A "Monthly Usage" column scales it'],
       ]],
+      ['Safety Watch', [
+        ['Detections', 'Every event is simulated, not a record of real people. Positions are checked live; habits that make the events happen are set numbers', 'model', 'A real system would feed the same screen from cameras'],
+        ['Rules and points', 'Path 2, vest 2, helmet 3, phone 3, overspeed 4 (limit 14 km/h), close call 5, hazmat entry 6, blocked exit 6, under raised forks 8', 'model', ''],
+        ['Fixes', 'Each applied fix cuts its violation type by about 70%', 'model', 'A planning figure, to be measured on site'],
+        ['Worker pace', 'Walking pace varies 12% either way; drivers 86% to 110% by experience', 'model', ''],
+      ]],
       ['Flow and people', [
         ['Arrivals', fmt(r.trucks, 1) + ' trucks and ' + fmt(r.orders, 1) + ' issue orders an hour (' + r.name + ' workload), lower on the evening and night shifts', 'model', 'Replay a day with your own receipts and issues'],
         ['Process times', 'Order checking 8-20 min, truck called and arriving 10-25 min, 5 min of paperwork at the door, 2 min to load or unload each pallet', 'ind', 'Typical figures, adjust to your own time study'],
@@ -43,7 +49,7 @@
   }
 
   function render(el) {
-    el.innerHTML = `<h4>About this model</h4><p>Building 100 is a concept model to show what a digital twin of the warehouse can do. These are the assumptions behind every number, and where each one comes from. Figures read live from the model, so they match what you see.</p>
+    el.innerHTML = `<h4>About this model</h4><p>Building 19 is a concept model to show what a digital twin of the warehouse can do. These are the assumptions behind every number, and where each one comes from. Figures read live from the model, so they match what you see.</p>
       <div class="abLegend">${Object.entries(SRC).map(([k, v]) => '<span class="abTag ' + k + '">' + v + '</span>').join('')}</div>
       ${sections().map(([title, rows]) => '<h4>' + title + '</h4><table><tbody>' + rows.map(([n, v, src, note]) => '<tr><td><b>' + n + '</b><br><span class="abTag ' + src + '">' + SRC[src] + '</span></td><td>' + P.esc(v) + (note ? '<br><small>' + P.esc(note) + '</small>' : '') + '</td></tr>').join('') + '</tbody></table>').join('')}
       <p>Everything marked "Sample figure" is made up for the demo. Replacing the stock file in the Data tab turns the stock, prices and owners into your real figures.</p>`;

@@ -1,4 +1,4 @@
-/* Building 100 - reality vs twin: add photos of the real warehouse, save the matching view, and drag a slider between the photo and the model */
+/* Building 19 - reality vs twin: add photos of the real warehouse, save the matching view, and drag a slider between the photo and the model */
 (function () {
   const B = window.B100, P = B.panel;
   const { renderer, scene, camera, controls } = B.three;

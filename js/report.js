@@ -1,4 +1,4 @@
-/* Building 100 - monthly management report: key figures, stock, safety and recommendations, printed or saved as PDF */
+/* Building 19 - monthly management report: key figures, stock, safety and recommendations, printed or saved as PDF */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d), esc = (t) => P.esc(String(t));
@@ -52,10 +52,10 @@
       #printReport .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } #printReport .foot { color: #777; margin-top: 14px; font-size: 10px; }
       @page { size: A4; margin: 14mm; }
     </style>
-    <h1>Building 100 &middot; Monthly management report</h1><p class="sub">${monthName} &middot; Materials warehouse digital twin &middot; generated ${now.toLocaleString('en-GB')}</p>
+    <h1>Building 19 &middot; Monthly management report</h1><p class="sub">${monthName} &middot; Materials warehouse digital twin &middot; generated ${now.toLocaleString('en-GB')}</p>
     <div class="grid">${tile(B.stock.sar(st.total), 'total stock value')}${tile(fmt(f.k.occ * 100, 1) + '%', 'racking occupancy')}${tile(fmt(f.shipMonth), 'pallets issued per month')}${tile(fmt(f.recvMonth), 'pallets received per month')}
       ${tile(f.k.cycle ? fmt(f.k.cycle, 1) + ' min' : '-', 'order cycle time')}${tile(fmt(f.k.util * 100, 0) + '%', 'forklift utilisation')}${tile(fmt(S.st.nearMiss), 'near misses')}${tile(f.acc == null ? '-' : fmt(f.acc * 100, 1) + '%', 'inventory record accuracy')}</div>
-    ${img ? '<img src="' + img + '" alt="3D view of Building 100">' : ''}
+    ${img ? '<img src="' + img + '" alt="3D view of Building 19">' : ''}
     <h2>Recommendations</h2><ul>${rec || '<li>No action needed this month.</li>'}</ul>
     <div class="two"><div><h2>Stock by class</h2><table><thead><tr><th>Class</th><th class="n">Materials</th><th class="n">Value</th><th class="n">Frozen</th></tr></thead><tbody>${abc}</tbody></table></div>
       <div><h2>Biggest frozen stock</h2><table><tbody>${frozen || '<tr><td>None</td></tr>'}</tbody></table></div></div>

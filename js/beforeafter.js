@@ -1,4 +1,4 @@
-/* Building 100 - before and after: today's warehouse against the warehouse with the proposed improvements, on one page */
+/* Building 19 - before and after: today's warehouse against the warehouse with the proposed improvements, on one page */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -26,15 +26,15 @@
 
   function render(el) {
     const rows = compare();
-    el.innerHTML = `<h4>Before and after</h4><p>Building 100 today, and the same warehouse once the proposed improvements are in place. Every "after" figure comes from the model itself; the yearly stock-take accuracy of 95% is a typical industry figure.</p>
+    el.innerHTML = `<h4>Before and after</h4><p>Building 19 today, and the same warehouse once the proposed improvements are in place. Every "after" figure comes from the model itself; the yearly stock-take accuracy of 95% is a typical industry figure.</p>
       <div class="ba">${rows.map((r) => { const ch = r.before ? ((r.after - r.before) / r.before) * 100 : 0, good = r.up ? ch > 0 : ch < 0;
         return `<div class="baRow"><div class="baName"><b>${r.name}</b><small>${P.esc(r.how)}</small></div><div class="baNum"><span>${val(r, r.before)}</span><i>→</i><b>${val(r, r.after)}</b><em class="${Math.abs(ch) < 0.5 ? '' : good ? 'good' : 'bad'}">${Math.abs(ch) < 0.5 ? 'same' : (ch > 0 ? '+' : '') + fmt(ch, 0) + '%'}</em></div></div>`; }).join('')}</div>
       <div class="btnrow"><button class="btn primary" id="baPrint">Print or save as PDF</button><button class="btn" id="baCsv">Export (CSV)</button></div>`;
-    el.querySelector('#baCsv').addEventListener('click', () => B.tools.download('building100-before-after.csv', ['Measure,Before,After,Change %,How'].concat(rows.map((r) => ['"' + r.name + (r.unit ? ' (' + r.unit + ')' : '') + '"', r.before.toFixed(1), r.after.toFixed(1), r.before ? (((r.after - r.before) / r.before) * 100).toFixed(1) : '', '"' + r.how + '"'].join(','))).join('\n')));
+    el.querySelector('#baCsv').addEventListener('click', () => B.tools.download('building19-before-after.csv', ['Measure,Before,After,Change %,How'].concat(rows.map((r) => ['"' + r.name + (r.unit ? ' (' + r.unit + ')' : '') + '"', r.before.toFixed(1), r.after.toFixed(1), r.before ? (((r.after - r.before) / r.before) * 100).toFixed(1) : '', '"' + r.how + '"'].join(','))).join('\n')));
     el.querySelector('#baPrint').addEventListener('click', () => {
       let pr = document.getElementById('printReport');
       if (!pr) { pr = document.createElement('div'); pr.id = 'printReport'; pr.style.display = 'none'; document.body.appendChild(pr); }
-      pr.innerHTML = '<h1 style="font:700 22px Archivo,Arial">Building 100 · Before and after</h1><p>' + new Date().toLocaleDateString('en-GB') + ' · sample data</p><table style="width:100%;border-collapse:collapse;font:13px Arial">' +
+      pr.innerHTML = '<h1 style="font:700 22px Archivo,Arial">Building 19 · Before and after</h1><p>' + new Date().toLocaleDateString('en-GB') + ' · sample data</p><table style="width:100%;border-collapse:collapse;font:13px Arial">' +
         rows.map((r) => '<tr style="border-bottom:1px solid #ccc"><td style="padding:6px"><b>' + r.name + '</b><br><small>' + P.esc(r.how) + '</small></td><td style="text-align:right">' + val(r, r.before) + '</td><td style="text-align:right"><b>' + val(r, r.after) + '</b></td></tr>').join('') + '</table>';
       pr.style.display = 'block';
       setTimeout(() => { try { window.print(); } catch (e) {} setTimeout(() => (pr.style.display = 'none'), 500); }, 200);

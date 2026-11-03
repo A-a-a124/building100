@@ -1,4 +1,4 @@
-/* Building 100 - "Data & analysis" drawer: tabs registered by the add-on modules, plus toasts */
+/* Building 19 - "Data & analysis" drawer: tabs registered by the add-on modules, plus toasts */
 (function () {
   const B = window.B100;
   const $ = (id) => document.getElementById(id);
@@ -7,8 +7,8 @@
   // tools are grouped in four sections; a tab not listed here falls under Operations
   const GROUPS = [
     ['Stock', ['data', 'value', 'owners', 'demand', 'count', 'slotting', 'log', 'move']],
-    ['Operations', ['alerts', 'predict', 'carriers', 'order', 'fleet', 'weather', 'handover', 'whatif', 'crossdock', 'returns', 'replay', 'compare', 'forecast']],
-    ['Safety', ['safety', 'hazmat', 'drill', 'errors', 'training']],
+    ['Operations', ['alerts', 'supervisor', 'predict', 'carriers', 'order', 'fleet', 'weather', 'handover', 'whatif', 'layout', 'eyes', 'crossdock', 'returns', 'replay', 'compare', 'forecast']],
+    ['Safety', ['watch', 'spot', 'safety', 'hazmat', 'drill', 'errors', 'training']],
     ['Reports', ['report', 'beforeafter', 'optimize', 'roi', 'targets', 'reality', 'about']],
   ];
   const groupOf = (id) => (GROUPS.find(([, ids]) => ids.includes(id)) || GROUPS[1])[0];

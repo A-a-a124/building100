@@ -1,4 +1,4 @@
-/* Building 100 - forklift breakdowns and maintenance: random failures, repair time, preventive plan, effect on orders */
+/* Building 19 - forklift breakdowns and maintenance: random failures, repair time, preventive plan, effect on orders */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

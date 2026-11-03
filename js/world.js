@@ -1,4 +1,4 @@
-/* Building 100 - 3D scene construction */
+/* Building 19 - 3D scene construction */
 (function () {
   const B = window.B100;
   const T = THREE;
@@ -480,7 +480,7 @@
       l.position.set(d.x, 5.4, d.z + d.dir * 0.4);
       W.labels.add(l);
     });
-    const name = W.makeLabel(('BUILDING 100 · MATERIALS WAREHOUSE'), { size: 3.2, bg: 'rgba(242,179,27,0.95)', fg: '#1a1300', weight: 700 });
+    const name = W.makeLabel(('BUILDING 19 · MATERIALS WAREHOUSE'), { size: 3.2, bg: 'rgba(242,179,27,0.95)', fg: '#1a1300', weight: 700 });
     name.position.set(-22, 15, BZ0);
     W.labels.add(name);
   };

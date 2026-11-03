@@ -1,4 +1,4 @@
-/* Building 100 - "How a twin works": the loop from the real warehouse through sensors and the twin to decisions, with live values and moving data */
+/* Building 19 - "How a twin works": the loop from the real warehouse through sensors and the twin to decisions, with live values and moving data */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

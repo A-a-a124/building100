@@ -1,4 +1,4 @@
-/* Building 100 - ask the twin: type a question in plain English, get a live answer and fly to the place (fixed rules, no outside AI) */
+/* Building 19 - ask the twin: type a question in plain English, get a live answer and fly to the place (fixed rules, no outside AI) */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -13,6 +13,7 @@
   }
   const rowsFill = () => B.RACK.rows.map((r, i) => ({ r, i, f: B.SLOTS.filter((s) => s.row === i && s.item >= 0).length / (B.RACK.bays * B.RACK.levels * 2) })).sort((a, b) => b.f - a.f);
   const RULES = [
+    [/who.*(broke|break|most|violat|rules)|violat|breach(es)? of|camera|rule breaker|most (rules|violations)/i, () => { const r = B.watch.board('person')[0], t = B.watch.board('type')[0]; if (!r) return { text: 'The cameras have not flagged anything yet.', go: () => B.tools.open('watch') }; return { text: 'Simulated detections: ' + r.label + ' leads with ' + r.pts + ' safety points from ' + r.n + ' detections. The most common rule is ' + t.label.toLowerCase() + '.', go: () => B.tools.open('watch') }; }],
     [/oldest|longest|not moved|stuck/i, (q) => { const it = material(q), pool = stocked().filter((s) => !it || s.item === it.i).sort((a, b) => b.days - a.days), s = pool[0]; return s ? { text: 'The oldest ' + (it ? it.name.toLowerCase() : 'pallet') + ' is at ' + s.code + ': no movement for ' + fmt(s.days) + ' days.', go: () => B.ui.focusSlot(s) } : null; }],
     [/how many|how much|quantity|do we have/i, (q) => { const it = material(q); if (!it) { const n = stocked().length; return { text: fmt(n) + ' pallets are in the racks, ' + fmt((n / B.SLOTS.length) * 100, 1) + '% of the positions.' }; } const l = B.SLOTS.filter((s) => s.item === it.i); return { text: fmt(l.reduce((a, s) => a + s.qty, 0)) + ' ' + it.name + ' on hand in ' + l.length + ' locations, worth ' + sar(l.reduce((a, s) => a + s.qty * B.stock.price(it), 0)) + '.', go: () => l[0] && B.ui.focusSlot(l[0]) }; }],
     [/where|find|locate|show/i, (q) => { const it = material(q); if (it) { const l = B.SLOTS.filter((s) => s.item === it.i).sort((a, b) => a.level - b.level); return l.length ? { text: it.name + ' is in ' + l.length + ' locations. The easiest to reach is ' + l[0].code + ' (level ' + l[0].level + ').', go: () => B.ui.focusSlot(l[0]) } : { text: it.name + ' is out of stock in the racks.' }; } return null; }],
@@ -39,7 +40,7 @@
   }
 
   // the box sits at the top of the left panel
-  const EX = ['Where is the oldest valve?', 'Which door is busy?', 'Which row is fullest?', 'What happens next?', 'How many pressure gauges do we have?', 'What should we improve?'];
+  const EX = ['Where is the oldest valve?', 'Which door is busy?', 'Which row is fullest?', 'Who broke the most rules?', 'What happens next?', 'How many pressure gauges do we have?', 'What should we improve?'];
   const sec = document.createElement('div');
   sec.className = 'sec asksec';
   sec.innerHTML = '<h2>Ask the twin</h2><form id="askF" class="search"><input id="askQ" placeholder="Ask a question in English" autocomplete="off" aria-label="Ask the twin a question"></form><div class="chips" id="askEx"></div><div class="askA" id="askA" hidden></div>';

@@ -1,4 +1,4 @@
-/* Building 100 - slotting: move fast movers close to shipping and low in the racks, with the travel saving in numbers */
+/* Building 19 - slotting: move fast movers close to shipping and low in the racks, with the travel saving in numbers */
 (function () {
   const B = window.B100, W = B.world, S = B.sim, T = THREE;
   const L = B.LANES, LIFT_M = 11.7; // one rack level of lifting costs about as much time as 11.7 m of driving

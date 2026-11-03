@@ -1,4 +1,4 @@
-/* Building 100 - stock economics: value in SAR, ABC / XYZ classes, min / max levels, frozen stock */
+/* Building 19 - stock economics: value in SAR, ABC / XYZ classes, min / max levels, frozen stock */
 (function () {
   const B = window.B100, W = B.world, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -124,7 +124,7 @@
     const c = compute(true);
     const cell = (a, x) => { const g = c.rows.filter((r) => r.abc === a && r.xyz === x && r.pallets); return { n: g.length, v: g.reduce((s, r) => s + r.value, 0) }; };
     const frozenTop = c.rows.filter((r) => r.frozen > 0).sort((a, b) => b.frozen - a.frozen).slice(0, 8);
-    el.innerHTML = `<h4>Stock value</h4><p>Value of everything in Building 100 and the open yard. Prices are sample figures until you load a file with a Unit Price column in the Data tab.</p>
+    el.innerHTML = `<h4>Stock value</h4><p>Value of everything in Building 19 and the open yard. Prices are sample figures until you load a file with a Unit Price column in the Data tab.</p>
       <div class="row2"><div class="stat"><b>${sar(c.total)}</b><small>total stock value</small></div><div class="stat"><b>${sar(c.rackValue)}</b><small>in the pallet racking</small></div>
       <div class="stat"><b style="color:var(--bad)">${sar(c.frozen)}</b><small>frozen: not moved for a year (${fmt(c.frozenPallets)} pallets)</small></div>
       <div class="stat"><b>${sar(c.slow)}</b><small>slow: 6 to 12 months (${fmt(c.slowPallets)} pallets)</small></div></div>
@@ -152,7 +152,7 @@
     el.querySelector('#stCsv').addEventListener('click', () => {
       const lines = ['Material,Description,Category,Class,On hand,Unit,Unit price SAR,Stock value SAR,Frozen value SAR,Holding cost SAR per year,Weekly use,Min,Max,Status,Critical'];
       c.rows.forEach((r) => lines.push([r.it.mat, '"' + r.it.name.replace(/"/g, '""') + '"', B.CATS[r.it.cat].name, r.abc + r.xyz, r.qty, r.it.unit, r.price, Math.round(r.value), Math.round(r.frozen), Math.round(r.hold), r.weekly.toFixed(2), r.min, r.max, r.below ? 'Below min' : r.over ? 'Overstock' : 'OK', r.critical ? 'Yes' : ''].join(',')));
-      B.tools.download('building100-abc-analysis.csv', lines.join('\n'));
+      B.tools.download('building19-abc-analysis.csv', lines.join('\n'));
     });
   }
   function colours() {

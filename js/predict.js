@@ -1,4 +1,4 @@
-/* Building 100 - look ahead: the twin runs the next 8 hours from today's exact state and warns what will happen, shown in the 3D view */
+/* Building 19 - look ahead: the twin runs the next 8 hours from today's exact state and warns what will happen, shown in the 3D view */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

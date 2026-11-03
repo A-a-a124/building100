@@ -1,4 +1,4 @@
-/* Building 100 - best setup: the twin tries every combination of fleet size, slotting, picking method and charging plan, and picks the winner */
+/* Building 19 - best setup: the twin tries every combination of fleet size, slotting, picking method and charging plan, and picks the winner */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

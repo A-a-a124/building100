@@ -1,4 +1,4 @@
-/* Building 100 - pallet journey: follow one real pallet from the truck to the rack and out again, every station timed by the twin */
+/* Building 19 - pallet journey: follow one real pallet from the truck to the rack and out again, every station timed by the twin */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

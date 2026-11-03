@@ -1,4 +1,4 @@
-/* Building 100 - mini-map: plan of the site with live forklifts, people, drones and the camera; click to fly there */
+/* Building 19 - mini-map: plan of the site with live forklifts, people, drones and the camera; click to fly there */
 (function () {
   const B = window.B100, S = B.sim, W = B.world;
   const { camera, controls, stage } = B.three;

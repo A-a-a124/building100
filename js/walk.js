@@ -1,4 +1,4 @@
-/* Building 100 - first-person walk mode (keyboard, mouse, touch) and a VR viewer for WebXR headsets */
+/* Building 19 - first-person walk mode (keyboard, mouse, touch) and a VR viewer for WebXR headsets */
 (function () {
   const B = window.B100, T = THREE, R = B.RACK;
   const { renderer, camera, controls, stage, scene } = B.three;

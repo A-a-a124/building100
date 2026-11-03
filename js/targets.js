@@ -1,4 +1,4 @@
-/* Building 100 - KPI targets: each indicator tile shows its target and turns green, amber or red */
+/* Building 19 - KPI targets: each indicator tile shows its target and turns green, amber or red */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);

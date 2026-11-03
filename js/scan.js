@@ -1,4 +1,4 @@
-/* Building 100 - scan a location or material label with the phone camera and jump to it in the model */
+/* Building 19 - scan a location or material label with the phone camera and jump to it in the model */
 (function () {
   const B = window.B100, P = B.panel;
   const CODE = /([A-N])\W?0?(\d{1,2})\W?([1-5])\W?([12])/i;

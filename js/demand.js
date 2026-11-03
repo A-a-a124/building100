@@ -1,4 +1,4 @@
-/* Building 100 - demand forecast per material (Holt for steady demand, Croston for intermittent spares) and forecast-based min / max */
+/* Building 19 - demand forecast per material (Holt for steady demand, Croston for intermittent spares) and forecast-based min / max */
 (function () {
   const B = window.B100, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -77,7 +77,7 @@
     el.querySelector('#dmAuto').addEventListener('click', () => { B.demand.auto = !B.demand.auto; B.stock.compute(true); B.tools.toast(B.demand.auto ? 'Min and max now follow the demand forecast' : 'Back to the fixed min / max rule'); render(el); });
     el.querySelector('#dmCsv').addEventListener('click', () => {
       const head = ['Material no', 'Material', 'Class', 'Method', 'Accuracy %'].concat(Array.from({ length: H }, (_, i) => 'Week +' + (i + 1)));
-      B.tools.download('building100-demand-forecast.csv', [head.join(',')].concat(fs.map(({ r, f }) => [r.it.mat, '"' + r.it.name + '"', r.abc + r.xyz, f.method, f.acc == null ? '' : Math.round(f.acc * 100)].concat(f.ahead.map((v) => v.toFixed(2))).join(','))).join('\n'));
+      B.tools.download('building19-demand-forecast.csv', [head.join(',')].concat(fs.map(({ r, f }) => [r.it.mat, '"' + r.it.name + '"', r.abc + r.xyz, f.method, f.acc == null ? '' : Math.round(f.acc * 100)].concat(f.ahead.map((v) => v.toFixed(2))).join(','))).join('\n'));
     });
   }
   function chart(c, r, f) {

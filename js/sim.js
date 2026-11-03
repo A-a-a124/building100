@@ -1,4 +1,4 @@
-/* Building 100 - discrete-event simulation of receiving, put-away and issue */
+/* Building 19 - discrete-event simulation of receiving, put-away and issue */
 (function () {
   const B = window.B100;
   const T = THREE;
@@ -170,7 +170,7 @@
   function moveAlong(f, dt) {
     // safety module may hold a forklift back to yield to another truck or a person
     if (B.safety && B.safety.blocked(f, dt)) return false;
-    const sp = f.load ? 2.4 : 3.2;
+    const sp = (f.load ? 2.4 : 3.2) * (f.skill || 1) * (f.burst || 1) * (f.warn ? 0.7 : 1);
     let left = sp * dt;
     while (left > 0 && f.path.length) {
       const p = f.path[0];

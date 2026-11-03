@@ -1,4 +1,4 @@
-/* Building 100 - replay a real day: load the actual receipts and issues, run them through the model and in 3D, compare with what happened */
+/* Building 19 - replay a real day: load the actual receipts and issues, run them through the model and in 3D, compare with what happened */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel, L = B.LANES, W = B.world;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -120,7 +120,7 @@
     const load = async (file) => { try { day = parse(await B.importer.readFile(file), file.name); analyse(); render(el); } catch (e) { B.tools.toast(e.message, 6000); } };
     inp.addEventListener('change', () => inp.files[0] && load(inp.files[0]));
     drop.addEventListener('drop', (e) => e.dataTransfer.files[0] && load(e.dataTransfer.files[0]));
-    el.querySelector('#rpTpl').addEventListener('click', () => B.tools.download('building100-day-template.csv', template()));
+    el.querySelector('#rpTpl').addEventListener('click', () => B.tools.download('building19-day-template.csv', template()));
     el.querySelector('#rpDemo').addEventListener('click', () => { day = parse(B.importer.parseCSV(template()), 'Sample day'); analyse(); render(el); });
     if (live) el.querySelector('#rpStop').addEventListener('click', () => { S.replay = null; B.tools.toast('Replay stopped: random arrivals are back on'); render(el); });
     if (day && result && result.runs) show(el.querySelector('#rpOut'));

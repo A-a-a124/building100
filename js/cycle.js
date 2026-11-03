@@ -1,4 +1,4 @@
-/* Building 100 - cycle count planner: weekly count schedule by ABC class, split between drone D1 and the team */
+/* Building 19 - cycle count planner: weekly count schedule by ABC class, split between drone D1 and the team */
 (function () {
   const B = window.B100, W = B.world, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -97,7 +97,7 @@
     q('ccCsv').addEventListener('click', () => {
       const lines = ['Day,Location,Material no,Material,System qty,Counted by,Counted qty'];
       p.days.forEach((d) => d.list.forEach((s) => { const it = B.ITEMS[s.item]; lines.push([d.name, s.code, it.mat, '"' + it.name + '"', s.qty, s.level >= 3 ? 'Drone D1' : 'Team', ''].join(',')); }));
-      B.tools.download('building100-cycle-count-week.csv', lines.join('\n'));
+      B.tools.download('building19-cycle-count-week.csv', lines.join('\n'));
     });
   }
   B.tools.add({ id: 'count', label: 'Cycle count', render });

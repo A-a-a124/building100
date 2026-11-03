@@ -1,4 +1,4 @@
-/* Building 100 - performance: merge static parts into a few draw calls, trim small shadow casters, adapt resolution to the device */
+/* Building 19 - performance: merge static parts into a few draw calls, trim small shadow casters, adapt resolution to the device */
 (function () {
   const B = window.B100, W = B.world, S = B.sim, T = THREE;
   const { renderer, scene, stage } = B.three;

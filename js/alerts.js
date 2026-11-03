@@ -1,4 +1,4 @@
-/* Building 100 - smart alerts and the supervisor's daily task list */
+/* Building 19 - smart alerts and the supervisor's daily task list */
 (function () {
   const B = window.B100, S = B.sim, P = B.panel;
   const fmt = (n, d) => B.tools.fmt(n, d);
@@ -83,7 +83,7 @@
       <div class="btnrow"><button class="btn" id="poCsv">Export the planner list (CSV)</button></div>`;
     el.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('click', () => alerts[+b.dataset.a].go()));
     el.querySelectorAll('[data-t]').forEach((c) => c.addEventListener('change', () => { const d = getDone(); d[c.dataset.t] = c.checked; store.set(doneKey(), JSON.stringify(d)); render(el); }));
-    el.querySelector('#poCsv').addEventListener('click', () => B.tools.download('building100-planner-list.csv', ['Material no,Description,On hand,Unit,Min,Max,Quantity needed,Unit price SAR,Value SAR,Critical']
+    el.querySelector('#poCsv').addEventListener('click', () => B.tools.download('building19-planner-list.csv', ['Material no,Description,On hand,Unit,Min,Max,Quantity needed,Unit price SAR,Value SAR,Critical']
       .concat(st.below.map((r) => [r.it.mat, '"' + r.it.name + '"', r.qty, r.it.unit, r.min, r.max, r.max - r.qty, r.price, (r.max - r.qty) * r.price, r.critical ? 'Yes' : ''].join(','))).join('\n')));
   }
 

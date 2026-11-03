@@ -1,4 +1,4 @@
-/* Building 100 - scene, camera, interaction and render loop */
+/* Building 19 - scene, camera, interaction and render loop */
 (function () {
   const B = window.B100, W = B.world, S = B.sim, P = B.panel;
   const T = THREE;
@@ -151,7 +151,7 @@
       while (o && !o.userData.pick) o = o.parent;
       if (!o) continue;
       const pk = o.userData.pick;
-      if (pk.type === 'slot') return { type: 'slot', s: B.SLOTS[h.instanceId] };
+      if (pk.type === 'slot') return { type: 'slot', s: B.SLOTS[o.userData.slotOf ? o.userData.slotOf[h.instanceId] : h.instanceId] };
       return pk;
     }
     return null;
@@ -160,7 +160,7 @@
     if (pk.type === 'slot') return pk.s.code + (pk.s.item >= 0 ? ': ' + B.ITEMS[pk.s.item].name : ' (empty)');
     if (pk.type === 'zone') return B.zoneById(pk.id).name;
     if (pk.type === 'forklift') return 'Forklift ' + pk.n;
-    if (pk.type === 'actor') { const a = B.actors.byId(pk.id); return a.name + ' · ' + a.role; }
+    if (pk.type === 'actor') { const a = B.actors.byId(pk.id); return a.role ? a.name + ' · ' + a.role : a.name; }
     return '';
   }
   let down = null, hoverReq = null;
@@ -327,18 +327,21 @@
 
   // ---------- Guided tour ----------
   const TOUR = [
-    ['overview', null, 'Building 100 from outside', 'A 138 x 80 m materials warehouse with an open storage yard beside it. Stock arrives through 4 doors on the north side and leaves through 4 on the south side.'],
+    ['overview', null, 'Building 19 from outside', 'A 138 x 80 m materials warehouse with an open storage yard beside it. Stock arrives through 4 doors on the north side and leaves through 4 on the south side.'],
     ['rcv', 'RCV', 'Receiving', 'Inbound trucks back onto the doors and their pallets are unloaded into the staging lane. A door light turns red while the door is occupied.'],
     [null, 'QC', 'Quality inspection', 'Material is checked against the delivery documents here. A green tag means accepted, red means on hold.'],
     ['rack', 'RACK', 'Pallet racking', '14 rows, A to N, each with 24 bays on 5 levels. Forklifts handle the heavy pallets; colour shows the material category.'],
     ['aisle', null, 'Inside an aisle', 'The operator view down an aisle. Watch for Drone D1 counting pallets here. Click any pallet to see its contents.'],
-    ['team', null, 'The team', 'Mansour and Mohsen carry the light cartons, Abdullah supervises with his tea, Nasser runs the stock system, and Ghazi stops by to chat with everyone.'],
+    ['team', null, 'The team', 'People work alongside the forklifts: Mansour and Mohsen move light cartons, Nasser and Abdullah (trainee) work in the office, and Ghazi supervises the floor.'],
     ['pipe', 'PIPE', 'Pipe yard', 'Cantilever racks hold bundles of 12 m pipe on three arm levels.'],
     [null, 'SHELF', 'Small parts store', 'Bin shelving for small spares. Workers carry these cartons by hand to the shipping lanes.'],
     ['haz', 'HAZ', 'Hazardous materials cage', 'A fenced cage with a containment floor. Drums are colour-coded by hazard class.'],
     ['yard', 'YARD', 'Open storage yard', 'Line pipe, cable drums, steel and containers outside. Drone D2 surveys the yard from 16 m.'],
     ['dsp', 'DSP', 'Shipping and issue', 'Forklifts gather the pallets for each issue order in front of a door, then a truck loads them.'],
     // the operations tools, each opened in the Data & analysis panel
+    ['overview', null, 'Safety Watch', 'Cameras cover the floor and check every position against the walkways, the hazmat cage and the forklifts. See who, what, where and when, jump to the evidence, and test a fix. The detections are simulated.', 'watch'],
+    ['overview', null, 'Be the supervisor', 'Three minutes in charge: trucks bunch up, forklifts fail, cameras flag people. Every decision changes the live twin, and you get a scorecard.', 'supervisor'],
+    ['top', null, 'Change the layout', 'Draw a walkway or drag a double rack row with the mouse. The forklifts use the new layout straight away.', 'layout'],
     ['overview', null, 'Look ahead', 'The twin runs the next 8 hours from the exact state of the warehouse and warns about queues, full rows and busy forklifts before they happen.', 'predict'],
     ['overview', null, 'Best setup', 'It tries every combination of fleet, slotting, picking and charging, and shows the winner with the yearly saving.', 'optimize'],
     ['overview', null, 'Alerts and the daily task list', 'The bell collects what needs attention: full rows, critical spares below minimum, hazmat breaches, broken forklifts, trucks waiting. It also builds the supervisor’s task list for the day.', 'alerts'],

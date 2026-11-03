@@ -1,4 +1,4 @@
-/* Building 100 - sensor layer: RFID gates, door, rack, climate and forklift sensors send simulated readings that stream up to the twin */
+/* Building 19 - sensor layer: RFID gates, door, rack, climate and forklift sensors send simulated readings that stream up to the twin */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE, P = B.panel;
   const { renderer, camera, scene, stage } = B.three;

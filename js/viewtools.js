@@ -1,4 +1,4 @@
-/* Building 100 - view tools: full-quality switch, shareable view links, photo mode */
+/* Building 19 - view tools: full-quality switch, shareable view links, photo mode */
 (function () {
   const B = window.B100, T = THREE;
   const { renderer, camera, controls, scene, stage } = B.three;
@@ -21,7 +21,7 @@
 
   // ---------- buttons at the end of the views bar ----------
   const views = document.getElementById('views');
-  views.insertAdjacentHTML('beforeend', '<button class="vbtn" id="vLink" title="Copy a link that opens this exact view">Copy view link</button><button class="vbtn" id="vPhoto" title="Hide the interface and save a picture">Photo mode</button>');
+  views.insertAdjacentHTML('beforeend', '<button class="vbtn" id="vLink" title="Copy a link that opens this exact view">Copy link</button><button class="vbtn" id="vPhoto" title="Hide the interface and save a picture">Photo mode</button>');
 
   // ---------- view links: camera and selection in the address ----------
   const r1 = (n) => Math.round(n * 10) / 10;
@@ -75,7 +75,7 @@
     const url = renderer.domElement.toDataURL('image/png');
     renderer.setPixelRatio(pr); renderer.setSize(r.width, r.height, false);
     const a = document.createElement('a');
-    a.href = url; a.download = 'building100-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.png';
+    a.href = url; a.download = 'building19-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.png';
     document.body.appendChild(a); a.click(); a.remove();
   }
   document.getElementById('vPhoto').addEventListener('click', enter);

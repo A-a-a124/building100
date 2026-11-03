@@ -1,4 +1,4 @@
-/* Building 100 - cinematic effects: light bloom and a glossier floor in Present and Photo modes, or always with the layer switch */
+/* Building 19 - cinematic effects: light bloom and a glossier floor in Present and Photo modes, or always with the layer switch */
 (function () {
   const B = window.B100, W = B.world, T = THREE;
   const { renderer, scene, camera, stage } = B.three;
@@ -19,6 +19,7 @@
       composer.addPass(bloom);
       composer.addPass(new T.ShaderPass(T.ACESFilmicToneMappingShader));
       composer.addPass(new T.ShaderPass(T.GammaCorrectionShader));
+      composer.addPass(new T.ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }', fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722)); c.rgb = mix(vec3(l), c.rgb, 1.14); c.rgb = (c.rgb - 0.5) * 1.06 + 0.5; gl_FragColor = c; }' }));
     });
     return loading;
   }

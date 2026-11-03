@@ -1,4 +1,4 @@
-/* Building 100 - what if: close a dock door or a rack row, a peak day, one forklift fewer, with the live effect; rack cutaway view */
+/* Building 19 - what if: close a dock door or a rack row, a peak day, one forklift fewer, with the live effect; rack cutaway view */
 (function () {
   const B = window.B100, S = B.sim, W = B.world, T = THREE, P = B.panel;
   const { renderer, scene } = B.three;
@@ -70,7 +70,7 @@
   renderer.localClippingEnabled = true;
   W.palletBase.material = W.palletBase.material.clone();
   const plane = new T.Plane(new T.Vector3(0, 0, 1), 0);
-  const rackMats = new Set([W.palletBase.material, W.palletLoad.material]);
+  const rackMats = new Set([W.palletBase.material, W.palletLoad.material, ...B.loads.materials]);
   scene.traverse((o) => { if (o.isInstancedMesh && (o.count === B.RACK.rows.length * (B.RACK.bays + 1) * 2 || o.count === B.RACK.rows.length * (B.RACK.bays + 1) * 6 || o.count === B.RACK.rows.length * (B.RACK.bays + 1) || (o.count === B.SLOTS.length && o !== W.palletBase && o !== W.palletLoad))) rackMats.add(o.material); });
   let cut = '', labelsWere = true;
   const ctl = document.createElement('div');
