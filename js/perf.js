@@ -108,7 +108,7 @@
     // only lower quality when our own rendering is the cause (not a browser frame cap such as battery saver)
     let work = 0;
     if (fps < 45 && ++checks % 3 === 0) { const gl = renderer.getContext(), t0 = performance.now(); renderer.render(scene, B.three.camera); gl.finish(); work = performance.now() - t0; B.perf.workMs = +work.toFixed(1); } // the measurement is itself a full render, so not on every check
-    if (fps < 45 && work > 12 && level < MAX) { if (performance.now() - lastUp < 45000) settled = true; level++; apply(); cooldown = 3; goodFor = 0; } // stepping back down soon after stepping up: stay here for good
+    if (fps < 45 && work > 12 && level < MAX - 1) { if (performance.now() - lastUp < 45000) settled = true; level++; apply(); cooldown = 3; goodFor = 0; } // stepping back down soon after stepping up: stay here for good
     else if (fps > 57 && level > 0 && !settled) { if ((goodFor += 1.5) >= 12) { level--; apply(); cooldown = 6; goodFor = 0; lastUp = performance.now(); } }
     else goodFor = 0;
     B.perf.fps = Math.round(fps); B.perf.level = level;

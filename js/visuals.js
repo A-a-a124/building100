@@ -20,7 +20,7 @@
     fragmentShader: `uniform vec3 zen; uniform vec3 hor; uniform vec3 sunCol; uniform vec3 sunDir; uniform float tm; uniform float day; uniform float dust; uniform float gam; varying vec3 vD;
       float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
       float n(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y); }
-      float fbm(vec2 p){ float a=.5,s=0.; for(int k=0;k<4;k++){ s+=a*n(p); p=p*2.03+vec2(7.1,3.7); a*=.5; } return s; }
+      float fbm(vec2 p){ float a=.5,s=0.; for(int k=0;k<5;k++){ s+=a*n(p); p=p*2.03+vec2(7.1,3.7); a*=.5; } return s; }
       void main(){ vec3 d=normalize(vD); float y=max(d.y,0.);
         vec3 c=mix(hor,zen,pow(smoothstep(0.,.62,y),.62));
         float s=max(dot(d,sunDir),0.);
@@ -48,7 +48,6 @@
     u.sunCol.value.copy(SUN.day).lerp(SUN.dusk, clamp01(dusk));
     u.sunDir.value.copy(sun.position).normalize(); u.tm.value = tm; u.day.value = day; u.dust.value = dust;
     u.gam.value = B.cinematic && B.cinematic.isOn() ? 2.2 : 1;
-    if (scene.fog && !dust) scene.fog.color.copy(c2);
   }
 
   // ---------- ground: dunes and colour drift, far past the old edge of the site ----------
@@ -199,7 +198,7 @@
   })();
 
   // clear glass instead of a milky film
-  W.shell.traverse((o) => { if (o.isMesh && o.material.transparent && o.material.side === T.DoubleSide && o.material.opacity < 0.2) { o.material.opacity = 0.055; o.material.color.set('#8fb0c8'); o.material.roughness = 0.25; o.material.metalness = 0.6; } });
+  W.shell.traverse((o) => { if (o.isMesh && o.material.transparent && o.material.side === T.DoubleSide && o.material.opacity < 0.2) { o.material.opacity = 0.055; o.material.color.set('#8fb0c8'); o.material.roughness = 0.08; o.material.metalness = 0.75; } });
   const hallFloor = W.floor.material;
   hallFloor.color.multiplyScalar(0.8);
 
@@ -230,7 +229,7 @@
 
   // ---------- polished floor: a real mirror image of the hall, sampled with fresnel, while cinematic effects are on ----------
   const REF = { on: false, k: 0.55, skip: 0 };
-  const rt = new T.WebGLRenderTarget(768, 432, { type: T.HalfFloatType, format: T.RGBAFormat, minFilter: T.LinearFilter, magFilter: T.LinearFilter, depthBuffer: true });
+  const rt = new T.WebGLRenderTarget(1024, 576, { type: T.HalfFloatType, format: T.RGBAFormat, minFilter: T.LinearFilter, magFilter: T.LinearFilter, depthBuffer: true });
   rt.texture.encoding = T.LinearEncoding; rt.texture.generateMipmaps = false;
   const mirror = new T.PerspectiveCamera();
   const refUni = { tRefl: { value: rt.texture }, reflMat: { value: new T.Matrix4() }, reflK: { value: 0 } };
@@ -260,13 +259,12 @@
     mirror.up.set(0, 1, 0).applyQuaternion(camera.quaternion); mirror.up.y = -mirror.up.y;
     mirror.lookAt(tgtV); mirror.updateMatrixWorld(true);
     refUni.reflMat.value.copy(bias).multiply(mirror.projectionMatrix).multiply(mirror.matrixWorldInverse);
-    site.visible = false; motes.visible = false; const shaftsOn = shafts.visible; shafts.visible = false;
     const labels = W.labels.visible, tm = renderer.toneMapping, sh = renderer.shadowMap.needsUpdate, target = renderer.getRenderTarget();
     W.labels.visible = false; renderer.toneMapping = T.NoToneMapping; renderer.shadowMap.needsUpdate = false; refUni.reflK.value = 0;
     const tagsWere = B.actors.tagsShown(); B.actors.showTags(false);
     renderer.setRenderTarget(rt); renderer.clear(); renderer.render(scene, mirror); renderer.setRenderTarget(target);
     B.actors.showTags(tagsWere);
-    W.labels.visible = labels; renderer.toneMapping = tm; renderer.shadowMap.needsUpdate = sh; refUni.reflK.value = REF.k; site.visible = true; shafts.visible = shaftsOn;
+    W.labels.visible = labels; renderer.toneMapping = tm; renderer.shadowMap.needsUpdate = sh; refUni.reflK.value = REF.k;
   }
 
   // ---------- sharper shadows covering the whole site in Full quality ----------
@@ -291,7 +289,7 @@
     const fps = fr / acc; fr = 0; acc = 0;
     if ((grace -= 2) > 0) return;
     if (!autoOn && fps > 56 && !box.checked && !(document.getElementById('lyLow') || {}).checked) { autoOn = true; box.checked = true; box.dispatchEvent(new Event('change')); grace = 8; }
-    else if (autoOn && fps < 48) { autoOn = false; auto = false; box.checked = false; box.dispatchEvent(new Event('change')); }
+    else if (autoOn && fps < 34) { autoOn = false; auto = false; box.checked = false; box.dispatchEvent(new Event('change')); }
   }
 
   // ---------- frame ----------
@@ -300,6 +298,8 @@
   B.hooks.frame.push((dt) => {
     tm += dt;
     if ((skyT += dt) > 0.25 || CAPTURE) { skyT = 0; paintSky(tm); }
+    // every frame: the environment module has just reset the fog, and far terrain must never see two colours
+    if (scene.fog && !(B.weather && B.weather.state.dust)) { scene.fog.color.copy(skyMat.uniforms.hor.value); if (skyMat.uniforms.gam.value > 1) scene.fog.color.convertSRGBToLinear(); }
     const h = ((S.st.t / 3600) % 24 + 24) % 24, day = smooth(6.5, 8.5, h) * (1 - smooth(16, 17.8, h)), dust = B.weather && B.weather.state.dust;
     const cy = camera.position.y, inside = camera.position.x > BLD.x0 - 40 && camera.position.x < BLD.x1 + 40 && camera.position.z > BLD.z0 - 40 && camera.position.z < BLD.z1 + 40;
     shaftMat.opacity = (dust ? 0.05 : 0.2) * day * (cy < 22 && inside ? 1 : 0.15);
@@ -309,8 +309,8 @@
     if (motes.visible) { const a = moteGeo.attributes.position, sk = dt * 2; for (let k = 0; k < MOTES; k++) { const v = moteV[k]; a.array[k * 3] += v[0] * sk; a.array[k * 3 + 1] += v[1] * sk; a.array[k * 3 + 2] += v[2] * sk; if (a.array[k * 3 + 1] > 11) a.array[k * 3 + 1] = 0.4; if (a.array[k * 3 + 1] < 0.3) a.array[k * 3 + 1] = 10; } a.needsUpdate = true; }
     lampGlow.material.opacity = 1 - day;
     autoQuality(dt);
-    REF.on = !!(B.cinematic && B.cinematic.isOn()) && !CAPTURE && cy < 60;
-    if (REF.on) { if (++REF.skip % 3 === 0) renderMirror(); refUni.reflK.value = REF.k; } else refUni.reflK.value = 0;
+    REF.on = !!(B.cinematic && B.cinematic.isOn()) && !CAPTURE && cy < 150;
+    if (REF.on) { if (++REF.skip % 2 === 0) renderMirror(); refUni.reflK.value = REF.k; } else refUni.reflK.value = 0;
   });
   unCull();
   B.visuals = { sky: skyMat, paintSky, refl: REF, renderMirror, site, unCull };

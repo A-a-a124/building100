@@ -28,7 +28,7 @@
     const u = op.userData; u.legL.rotation.x = u.legR.rotation.x = -1.3; u.armL.rotation.x = u.armR.rotation.x = -0.9;
     mesh.position.set(door.x + 3.2, 0, door.z + door.dir * 3.8);
     mesh.rotation.y = door.dir > 0 ? Math.PI : 0;
-    W.mergeStatic(op); mesh.traverse((o) => (o.castShadow = false));
+    W.mergeStatic(op);
     scene.add(mesh);
     const q = { door, mesh, load: null, cyc: -1, reversing: false, p: null };
     dock.set(door, q);
@@ -89,7 +89,7 @@
       }
       place(q, pos, hx, hz, ramp(pos));
     });
-    dock.forEach((q) => { if (!q.active) { q.reversing = false; detach(q); q.cyc = -1; const d = q.door; q.mesh.position.set(d.x + 3.2, 0, d.z + d.dir * 3.8); } q.mesh.visible = q.active && q.mesh.position.distanceTo(B.three.camera.position) < 150; });
+    dock.forEach((q) => { if (!q.active) { q.reversing = false; detach(q); q.cyc = -1; const d = q.door; q.mesh.position.set(d.x + 3.2, 0, d.z + d.dir * 3.8); } });
   }
 
   // ---------- rest area between the small parts store and the hazmat cage ----------
@@ -187,7 +187,7 @@
         f.inspected = sh; f.phase = 'inspect'; f.inspectEnd = S.st.t + 150 + R() * 90;
         const g = A.makePerson({ height: 1.72, girth: 1, skin: '#a8754f', shirt: A.CLOTH.beige, pants: A.CLOTH.black, vest: true, hat: 'helmet', hatColor: '#f4f4f0' });
         const board = W.box(0.22, 0.3, 0.02, '#e6e1d3'); board.position.set(0, -0.3, 0.08); g.userData.elbowR.add(board);
-        g.traverse((o) => (o.castShadow = false)); scene.add(g); insp.set(f, { g, a: R() * 6 });
+        scene.add(g); insp.set(f, { g, a: R() * 6 });
         if (f.mesh.userData.op) f.mesh.userData.op.visible = false;
       } else if (q) end(f);
     });
