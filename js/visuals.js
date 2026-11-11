@@ -37,7 +37,7 @@
   const SUN = { day: new T.Color('#fff2d8'), dusk: new T.Color('#ff9a4c') };
   const c1 = new T.Color(), c2 = new T.Color();
   function paintSky(tm) {
-    const h = ((S.st.t / 3600) % 24 + 24) % 24;
+    const h = B.env.lightHour();
     const day = smooth(5.4, 7.2, h) * (1 - smooth(17, 18.8, h));
     const dusk = clamp01(1 - Math.abs(h - 6) / 1.5) + clamp01(1 - Math.abs(h - 18) / 1.5);
     const u = skyMat.uniforms, dust = B.weather && B.weather.state.dust ? 1 : 0;
@@ -300,7 +300,7 @@
     if ((skyT += dt) > 0.25 || CAPTURE) { skyT = 0; paintSky(tm); }
     // every frame: the environment module has just reset the fog, and far terrain must never see two colours
     if (scene.fog && !(B.weather && B.weather.state.dust)) { scene.fog.color.copy(skyMat.uniforms.hor.value); if (skyMat.uniforms.gam.value > 1) scene.fog.color.convertSRGBToLinear(); }
-    const h = ((S.st.t / 3600) % 24 + 24) % 24, day = smooth(6.5, 8.5, h) * (1 - smooth(16, 17.8, h)), dust = B.weather && B.weather.state.dust;
+    const h = B.env.lightHour(), day = smooth(6.5, 8.5, h) * (1 - smooth(16, 17.8, h)), dust = B.weather && B.weather.state.dust;
     const cy = camera.position.y, inside = camera.position.x > BLD.x0 - 40 && camera.position.x < BLD.x1 + 40 && camera.position.z > BLD.z0 - 40 && camera.position.z < BLD.z1 + 40;
     shaftMat.opacity = (dust ? 0.05 : 0.2) * day * (cy < 22 && inside ? 1 : 0.15);
     shafts.visible = shaftMat.opacity > 0.01;

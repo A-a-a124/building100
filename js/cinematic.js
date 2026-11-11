@@ -20,7 +20,7 @@
       composer.addPass(bloom);
       composer.addPass(new T.ShaderPass(T.ACESFilmicToneMappingShader));
       composer.addPass(new T.ShaderPass(T.GammaCorrectionShader));
-      composer.addPass(new T.ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }', fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722)); c.rgb = mix(vec3(l), c.rgb, 1.14); c.rgb = (c.rgb - 0.5) * 1.06 + 0.5; gl_FragColor = c; }' }));
+      composer.addPass(new T.ShaderPass({ uniforms: { tDiffuse: { value: null }, px: { value: new T.Vector2(1 / size.x, 1 / size.y) } }, vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }', fragmentShader: 'uniform sampler2D tDiffuse; uniform vec2 px; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); vec3 nb = (texture2D(tDiffuse, vUv + vec2(px.x, 0.0)).rgb + texture2D(tDiffuse, vUv - vec2(px.x, 0.0)).rgb + texture2D(tDiffuse, vUv + vec2(0.0, px.y)).rgb + texture2D(tDiffuse, vUv - vec2(0.0, px.y)).rgb) * 0.25; c.rgb = clamp(c.rgb + (c.rgb - nb) * 0.24, 0.0, 1.0); float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722)); c.rgb = mix(vec3(l), c.rgb, 1.14); c.rgb = (c.rgb - 0.5) * 1.06 + 0.5; gl_FragColor = c; }' }));
     });
     return loading;
   }
@@ -33,7 +33,7 @@
     const size = renderer.getDrawingBufferSize(new T.Vector2());
     if (composer.renderTarget1.width !== size.x || composer.renderTarget1.height !== size.y) composer.setSize(size.x / renderer.getPixelRatio(), size.y / renderer.getPixelRatio()), composer.setPixelRatio(renderer.getPixelRatio());
     const tm = renderer.toneMapping; renderer.toneMapping = T.NoToneMapping;
-    composer.passes[3].uniforms.exposure.value = renderer.toneMappingExposure;
+    composer.passes[3].uniforms.exposure.value = renderer.toneMappingExposure; composer.passes[5].uniforms.px.value.set(1 / size.x, 1 / size.y);
     composer.render();
     renderer.toneMapping = tm;
     inside = false;

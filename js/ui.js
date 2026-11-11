@@ -137,7 +137,7 @@
     W.clearHighlight();
     P.showForklift(n);
   }
-  B.ui = { focusSlot, focusZone, setView, focusActor, flyTo, stopFollow: () => (follow = null), followObj: (o) => { fly = null; follow = o; } };
+  B.ui = { focusSlot, focusZone, setView, focusActor, flyTo, stopFollow: () => (follow = null), stopFly: () => (fly = null), followObj: (o) => { fly = null; follow = o; } };
 
   const ray = new T.Raycaster();
   const mouse = new T.Vector2();

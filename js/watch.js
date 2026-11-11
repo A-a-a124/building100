@@ -33,6 +33,7 @@
     { x: [47, 58], z: [-3, 3] }, // rest area
     { x: [-20, -4], z: [-38, -29] }, // office
   ];
+  const inCage = (x, z) => x > 47.4 && x < 66 && z > 3.2 && z < 37;
   const inRect = (r, x, z) => x >= r.x[0] && x <= r.x[1] && z >= r.z[0] && z <= r.z[1];
   const onPath = (x, z) => WALKS.some((r) => inRect(r, x, z)) || ALLOWED.some((r) => inRect(r, x, z)) || extraWalks.some((r) => inRect(r, x, z));
   const extraWalks = [];
@@ -198,7 +199,7 @@
       else if (roll < 0.66) { if (R() < factor('vest')) stage_(a, 'vest', 150 + R() * 200); }
       else if (roll < 0.86) { if (R() < factor('phone')) stage_(a, 'phone', 60 + R() * 80); }
       else if (roll < 0.94) { // into the hazmat cage through the gate, without a permit
-        if (R() < factor('hazmat') && a.x > 40) detour(a, [{ x: 46, z: 8 }, { x: 49.5, z: 9 }, { x: 46, z: 8 }]);
+        if (R() < factor('hazmat') && a.x > 40) detour(a, [{ x: 46, z: 8 }, { x: 50.5, z: 9 }, { x: 46, z: 8 }]);
       } else { // next to a forklift whose forks are up
         const f = S.forklifts.find((q) => q.lift && q.carY > 1.2 && Math.hypot(q.x - a.x, q.z - a.z) < 26);
         if (f && R() < factor('forks')) { f.lift.timer = Math.min(f.lift.timer, -22); detour(a, [{ x: f.x + 1.2, z: f.z + 0.6 }]); }
@@ -234,11 +235,11 @@
       const st = active.get(a), nm = nameOf(a);
       if (st && st.kind !== 'phone') record(st.kind, nm, a.id, a.x, a.z);
       if (st && st.kind === 'phone' && a.wait <= 0) record('phone', nm, a.id, a.x, a.z);
-      if (!onPath(a.x, a.z) && !inRect(B.zoneById('HAZ'), a.x, a.z) && !a.chatting) {
+      if (!onPath(a.x, a.z) && !inCage(a.x, a.z) && !a.chatting) {
         if (a.route) record('lane', nm, a.id, a.x, a.z);
         else if (a.id === 'abdullah' || a.id === 'ghazi') { a.offT = (a.offT || 0) + dt; if (a.offT > 25) { a.offT = 0; record('lane', nm, a.id, a.x, a.z); } } else a.offT = 0;
       }
-      if (inRect(B.zoneById('HAZ'), a.x, a.z)) record('hazmat', nm, a.id, a.x, a.z);
+      if (inCage(a.x, a.z)) record('hazmat', nm, a.id, a.x, a.z);
     });
     S.forklifts.forEach((f) => {
       const p = lastPos.get(f);
@@ -285,7 +286,7 @@
       dressForklift(f);
       const u = f.mesh.userData;
       const moving = f.path && f.path.length && !f.lift && !f.down;
-      const near = warnOn && moving && A.list.some((a) => a.kind === 'person' && Math.hypot(a.x - f.x, a.z - f.z) < 5 && a.state !== 'desk' && !(a.state === 'brew'));
+      const near = !!(warnOn && moving) && A.list.some((a) => a.kind === 'person' && Math.hypot(a.x - f.x, a.z - f.z) < 5 && a.state !== 'desk' && !(a.state === 'brew'));
       f.warn = near;
       u.wBeacon.visible = near && Math.sin(now * 14) > -0.2;
       u.warnRing.visible = near; if (near) { u.warnRing.material.opacity = 0.35 + 0.3 * Math.sin(now * 9); any = true; }

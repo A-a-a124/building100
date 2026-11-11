@@ -24,11 +24,11 @@
     if (dock.has(door)) return dock.get(door);
     const mesh = W.makeForklift('D');
     const op = A.makePerson({ height: 1.7, girth: 0.95, skin: '#a8754f', shirt: A.CLOTH.beige, pants: A.CLOTH.black, vest: true, hat: 'helmet', hatColor: '#f4f4f0' });
-    op.position.set(0, 0.62, 0.5); op.scale.setScalar(0.96); mesh.add(op);
-    const u = op.userData; u.legL.rotation.x = u.legR.rotation.x = -1.3; u.armL.rotation.x = u.armR.rotation.x = -0.9;
+    op.position.set(0, 0.5, 0.46); op.rotation.y = Math.PI; op.scale.setScalar(0.96); mesh.add(op);
+    const u = op.userData; u.legL.rotation.x = u.legR.rotation.x = -1.3; u.armL.rotation.x = u.armR.rotation.x = -0.95; u.elbowL.rotation.x = u.elbowR.rotation.x = -0.55;
     mesh.position.set(door.x + 3.2, 0, door.z + door.dir * 3.8);
     mesh.rotation.y = door.dir > 0 ? Math.PI : 0;
-    W.mergeStatic(op);
+    op.traverse((q) => (q.castShadow = false));
     scene.add(mesh);
     const q = { door, mesh, load: null, cyc: -1, reversing: false, p: null };
     dock.set(door, q);

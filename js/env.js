@@ -7,6 +7,8 @@
   const opts = { cycle: true };
   const smooth = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   const hour = () => ((S.st.t / 3600) % 24 + 24) % 24;
+  let lightAt = null;
+  const lightHour = () => (lightAt == null ? hour() : lightAt);
 
   // ---------- shifts ----------
   function shift(h) {
@@ -84,7 +86,7 @@
       base = new T.Color(getComputedStyle(document.documentElement).getPropertyValue('--scene').trim() || '#dbe2e8');
       sandBase = new T.Color(base.r + base.g + base.b < 1.2 ? '#4d4538' : '#cbb68e');
     }
-    const h = hour();
+    const h = lightHour();
     const d = opts.cycle ? smooth(5, 8, h) * (1 - smooth(17.5, 20, h)) : 1;
     const ang = ((h - 6) / 12) * Math.PI;
     sun.position.set(110 * Math.cos(ang), Math.max(12, 120 * Math.sin(ang)), 45);
@@ -108,6 +110,7 @@
   });
 
   B.env = {
+    lightHour, setLight: (h) => (lightAt = h == null ? null : ((h % 24) + 24) % 24),
     shiftName: () => { const s = shift(hour()); return s.name + (s.brk ? ' · ' + s.brk : ''); },
     onBreak: () => !!shift(hour()).brk,
     rateFactor: () => { const s = shift(hour()); return s.k * (s.brk ? 0.5 : 1); },

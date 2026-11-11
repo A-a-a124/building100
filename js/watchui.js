@@ -67,7 +67,7 @@
       if (a.kind !== 'person' || a.state === 'desk') return;
       const u = a.mesh.userData, foot = project(c, a.x, 0, a.z), head = project(c, a.x, 1.9 * (u.s || 1), a.z);
       if (!foot || !head || foot.y - head.y < 6) return;
-      const hh = foot.y - head.y, st = Wt.active.get(a), off = !Wt.onPath(a.x, a.z), haz = a.x > 46 && a.x < 66 && a.z > 3 && a.z < 37;
+      const hh = foot.y - head.y, st = Wt.active.get(a), off = !Wt.onPath(a.x, a.z), haz = a.x > 47.4 && a.x < 66 && a.z > 3 && a.z < 37;
       let label = 'PERSON ' + conf(i + 3), color = '#3df08a', thick = 1.5;
       if (st) { label = { helmet: 'NO HELMET', vest: 'NO VEST', phone: 'PHONE IN USE' }[st.kind]; color = '#ff3b30'; thick = 2.5; viol++; }
       else if (haz) { label = 'NO PERMIT'; color = '#ff3b30'; thick = 2.5; viol++; }

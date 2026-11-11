@@ -197,13 +197,10 @@
   function crew() {
     S.forklifts.forEach((f) => {
       if (f.mesh.userData.op) return;
-      const g = new T.Group();
-      const torso = new T.Mesh(new T.CylinderGeometry(0.21, 0.18, 0.55, 14), vest); torso.scale.z = 0.62; torso.position.y = 1.78;
-      const head = new T.Mesh(new T.SphereGeometry(0.12, 14, 10), skin); head.position.y = 2.17;
-      const hat = new T.Mesh(new T.SphereGeometry(0.135, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), helmet); hat.position.y = 2.2;
-      [-1, 1].forEach((s) => { const arm = new T.Mesh(new T.CylinderGeometry(0.05, 0.045, 0.42, 8), vest); arm.position.set(s * 0.26, 1.72, -0.12); arm.rotation.x = 0.9; g.add(arm); });
-      g.add(torso, head, hat); g.position.z = 0.5;
-      g.traverse((o) => (o.castShadow = true));
+      const g = W.makeFigure({ height: 1.72, girth: 0.98, skin: '#a8754f', shirt: B.actors.CLOTH.beige, pants: B.actors.CLOTH.black, vest: true, hat: 'helmet', hatColor: '#f4f4f0' }), u = g.userData;
+      g.position.set(0, 0.5, 0.46); g.rotation.y = Math.PI; g.scale.setScalar(0.96);
+      u.legL.rotation.x = u.legR.rotation.x = -1.3; u.armL.rotation.x = u.armR.rotation.x = -0.95; u.elbowL.rotation.x = u.elbowR.rotation.x = -0.55;
+      g.traverse((q) => (q.castShadow = false));
       f.mesh.add(g); f.mesh.userData.op = g;
     });
   }
@@ -242,7 +239,7 @@
     sun.intensity *= 1 + 0.72 * k;
     hemi.intensity *= 1 - 0.5 * k;
     if (scene.fog && !(B.weather && B.weather.state.dust)) { scene.fog.near = 640; scene.fog.far = 1180; }
-    const h = ((B.sim.st.t / 3600) % 24 + 24) % 24, low = Math.min(1, Math.abs(h - 12.5) / 6);
+    const h = B.env ? B.env.lightHour() : 12, low = Math.min(1, Math.abs(h - 12.5) / 6);
     sun.color.copy(noon).lerp(warm, low);
   });
   // soft vignette that frames the scene like a camera lens
