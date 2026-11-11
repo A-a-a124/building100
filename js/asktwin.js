@@ -13,6 +13,7 @@
   }
   const rowsFill = () => B.RACK.rows.map((r, i) => ({ r, i, f: B.SLOTS.filter((s) => s.row === i && s.item >= 0).length / (B.RACK.bays * B.RACK.levels * 2) })).sort((a, b) => b.f - a.f);
   const RULES = [
+    [/what happened|what has happened|summar|recap|in the (last|past)|over the (last|past)/i, (q) => { const m = /(\d+(?:\.\d+)?)\s*(min(?:ute)?s?|hours?|hrs?|h)\b/i.exec(q), hr = /hour|shift/i.test(q) && !m, w = m ? (+m[1]) * (/^m/i.test(m[2]) ? 60 : 3600) : /shift/i.test(q) ? 8 * 3600 : hr ? 3600 : 3600; const win = Math.max(60, Math.min(12 * 3600, w)); return { text: B.recap.sentence(B.recap.summary(win)), go: () => B.recap.open(win) }; }],
     [/who.*(broke|break|most|violat|rules)|violat|breach(es)? of|camera|rule breaker|most (rules|violations)/i, () => { const r = B.watch.board('person')[0], t = B.watch.board('type')[0]; if (!r) return { text: 'The cameras have not flagged anything yet.', go: () => B.tools.open('watch') }; return { text: 'Simulated detections: ' + r.label + ' leads with ' + r.pts + ' safety points from ' + r.n + ' detections. The most common rule is ' + t.label.toLowerCase() + '.', go: () => B.tools.open('watch') }; }],
     [/oldest|longest|not moved|stuck/i, (q) => { const it = material(q), pool = stocked().filter((s) => !it || s.item === it.i).sort((a, b) => b.days - a.days), s = pool[0]; return s ? { text: 'The oldest ' + (it ? it.name.toLowerCase() : 'pallet') + ' is at ' + s.code + ': no movement for ' + fmt(s.days) + ' days.', go: () => B.ui.focusSlot(s) } : null; }],
     [/how many|how much|quantity|do we have/i, (q) => { const it = material(q); if (!it) { const n = stocked().length; return { text: fmt(n) + ' pallets are in the racks, ' + fmt((n / B.SLOTS.length) * 100, 1) + '% of the positions.' }; } const l = B.SLOTS.filter((s) => s.item === it.i); return { text: fmt(l.reduce((a, s) => a + s.qty, 0)) + ' ' + it.name + ' on hand in ' + l.length + ' locations, worth ' + sar(l.reduce((a, s) => a + s.qty * B.stock.price(it), 0)) + '.', go: () => l[0] && B.ui.focusSlot(l[0]) }; }],
@@ -40,7 +41,7 @@
   }
 
   // the box sits at the top of the left panel
-  const EX = ['Where is the oldest valve?', 'Which door is busy?', 'Which row is fullest?', 'Who broke the most rules?', 'What happens next?', 'How many pressure gauges do we have?', 'What should we improve?'];
+  const EX = ['Where is the oldest valve?', 'Which door is busy?', 'Which row is fullest?', 'What happened in the last hour?', 'Who broke the most rules?', 'What happens next?', 'How many pressure gauges do we have?', 'What should we improve?'];
   const sec = document.createElement('div');
   sec.className = 'sec asksec';
   sec.innerHTML = '<h2>Ask the twin</h2><form id="askF" class="search"><input id="askQ" placeholder="Ask a question in English" autocomplete="off" aria-label="Ask the twin a question"></form><div class="chips" id="askEx"></div><div class="askA" id="askA" hidden></div>';

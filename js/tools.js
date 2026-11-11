@@ -7,7 +7,7 @@
   // tools are grouped in four sections; a tab not listed here falls under Operations
   const GROUPS = [
     ['Stock', ['data', 'value', 'owners', 'demand', 'count', 'slotting', 'log', 'move']],
-    ['Operations', ['alerts', 'supervisor', 'predict', 'carriers', 'order', 'fleet', 'weather', 'handover', 'whatif', 'layout', 'eyes', 'crossdock', 'returns', 'replay', 'compare', 'forecast']],
+    ['Operations', ['alerts', 'recap', 'supervisor', 'predict', 'carriers', 'order', 'fleet', 'weather', 'handover', 'whatif', 'layout', 'eyes', 'crossdock', 'returns', 'replay', 'compare', 'forecast']],
     ['Safety', ['watch', 'spot', 'safety', 'hazmat', 'drill', 'errors', 'training']],
     ['Reports', ['report', 'beforeafter', 'optimize', 'roi', 'targets', 'reality', 'about']],
   ];
